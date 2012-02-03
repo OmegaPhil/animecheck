@@ -20,14 +20,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # TODO: GPL3+?
 
-import sys, re, zlib, os
+import os, re, shutil, sys, zlib
+from optparse import OptionParser
+
+# Variable declaration
+addHashModeFiles = []
 
 # Defining terminal escape codes
-c_null  = "\x1b[00;00m"
-c_red   = "\x1b[31;01m"
+c_null = "\x1b[00;00m"
+c_red = "\x1b[31;01m"
 c_green = "\x1b[32;01m"
 p_reset = "\x08"*8
- 
+
 def crc32_checksum(filename):
 
     # Variable allocation
@@ -42,7 +46,7 @@ def crc32_checksum(filename):
     try:
         while True:
 	    
-	    # Reading in a chunk of the data and updating the terminal
+            # Reading in a chunk of the data and updating the terminal
             data = file.read(buff_size)
             done += buff_size
             
@@ -66,15 +70,24 @@ def crc32_checksum(filename):
     
     # If the crc hex value is negative, bitwise and it with the maximum 32bit value. Apparently this is a 'bit mask' resulting in a 32bit long value (rather than an infinitely long value, see http://stackoverflow.com/a/7825412). It is also guaranteed to return a positive number
     if crc < 0:
-        crc &= 2**32-1
+        crc &= 2 ** 32 - 1
         
     # Return 8-digit precision decimal hex integer in uppercase
     return "%.8X" % (crc)
 
-# Looping for all passed files
-for file in sys.argv[1:]:
+# Configuring and parsing passed options
+parser = OptionParser()
+parser.add_option('-a', '--add-hash-mode', dest='addHashMode', help='mode to define when a CRC32 hash is added to a filename where none has been found. Defaults to \'none\', \'ask\' prompts the user after hashing and \'always\' causes the hash to automatically be added when missing', metavar='addHashMode', choices=('none', 'ask', 'always'), default='none')
+(options, args) = parser.parse_args()
+
+# Debug code
+#print(args))
+
+# Looping for all passed files - these are left over in args after the options have been processed
+for file in args:
     try:
-	# Hashing file
+        
+        # Hashing file
         crc = crc32_checksum(file)
         
         # Obtaining the hash from the filename (penultimate fragment) - remember that re does not support POSIX character classes
@@ -92,10 +105,41 @@ for file in sys.argv[1:]:
         # Printing results with coloured hash at the beginning and in the file path
         print("%s%s%s   %s%s%s%s%s" % (c_in, crc, c_null, sfile[0], c_in, dest_sum, c_null, sfile[1]))
     
-    # Intercepting inability to extract the embedded CRC32
     except(IndexError, ValueError):
-        print(crc, "   ", file)
         
+        # No CRC32 has been found - outputting calculated value and file path
+        print("%s   %s" % (crc, file))
+        
+        # If hashes are to be added to filenames, adding to the list
+        if options.addHashMode != 'none':
+            hashedFile = [file, crc]
+            addHashModeFiles.append(hashedFile)
+
     except(IOError) as e:
-        print(e)
+        sys.stderr.write(e)
         continue
+
+# If files without hashes exist and the add hash mode is 'ask', proceeding only if the user wants to
+if len(addHashModeFiles) > 0 and options.addHashMode == 'ask' and raw_input('\nDo you want to add CRC32 hashes to the filenames of files without them (y/n)?').lower() != 'y':
+    print('Hashes will not be added to files without them')
+    sys.exit()
+    
+# Looping for all files that need a hash adding to
+for hashedFile in addHashModeFiles:
+        
+    try:
+        
+        # Obtaining file name and file extension
+        (filePath, fileName) = os.path.split(hashedFile[0])
+        (fileName, fileExtension) = os.path.splitext(fileName)
+        
+        # Renaming file with the hash (note that the hash does not end up before the first fullstop in a filename - however my usage will not include files with more than one fullstop
+        filePath = os.path.join(filePath, fileName + ' [' + hashedFile[1] + ']' + fileExtension)
+        shutil.move(hashedFile[0], filePath)
+    
+    except(Error) as e:
+        sys.stderr.write('Addition of CRC32 hash \'%s\' to the filename of \'%s\' failed: %s' % (crc, file, e))
+        continue
+
+# TODO: Extend with sfv and md5 file parsing via cfv, including creation
+# TODO: Add ed2k hashing if possible?
