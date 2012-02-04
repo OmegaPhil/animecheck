@@ -1,2 +1,5 @@
 # Kate temporary files
 *~
+
+# Python bytecode files
+*.pyc
