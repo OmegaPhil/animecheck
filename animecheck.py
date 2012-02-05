@@ -21,10 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # TODO: GPL3+?
 
 import codecs
+import io
 import os
 import re
 import shutil
-import StringIO
 import sys
 import zlib
 from optparse import OptionParser
@@ -96,7 +96,8 @@ def DisplayResults(fileToHash, crc, checksumFileCRC=None):
 
             # Obtaining the hash from the filename (penultimate fragment) -
             # remember that re does not support POSIX character classes
-            dest_sum = re.split("([a-fA-F0-9]{8})", fileToHash)[-2]
+            dest_sum = re.split('([a-f0-9]{8})', fileToHash, \
+                                flags=re.IGNORECASE)[-2]
 
             # Setting colours depending on good/bad hash
             if crc == dest_sum.upper():
@@ -148,13 +149,19 @@ def OpenFile(fileToOpen):
     fileData = open(fileToOpen, 'rb').read()
 
     # Detecting utf16 encoding and decoding to sane data. Appears
-    # to also thankfully kill off the BOM
+    # to also thankfully kill off the BOM. The following StringIO wants
+    # unicode so everything else is encoded accordingly
     if fileData.startswith(codecs.BOM_UTF16):
         fileData = fileData.decode('utf16')
+    else:
+        fileData = unicode(fileData)
 
     # You apparently cant just split the resulting string into newlines and
     # then iterate over them, so returning a file-like object
-    return StringIO.StringIO(fileData)
+    # io's StringIO translates newlines, raw StringIO doesnt - however even
+    # though io's 'universal newlines' translation is supposed to be default
+    # on (None), it isnt unless you explicitly pass None!!
+    return io.StringIO(fileData, None)
 
 
 def CRC32HashMode(files):
@@ -192,8 +199,8 @@ without them (y/n)?').lower() != 'y':
             (fileName, fileExtension) = os.path.splitext(fileName)
 
             # Renaming file with the hash (note that the hash does not end up
-            # before the first fullstop in a filename - however my usage will not
-            # include files with more than one fullstop
+            # before the first fullstop in a filename - however my usage will
+            # not include files with more than one fullstop
             filePath = \
             os.path.join(filePath, fileName + ' [' + hashedFile[1] + ']' + \
                          fileExtension)
@@ -218,15 +225,24 @@ def CheckSFVFile(checksumFile):
             # Ignoring comments
             if line[0] != ';':
 
-                # Extracting hash (last 'word' on line) and the file to hash
-                # Windows path separators are converted to UNIX ones in order
-                # to support nested directories
-                # TODO: Can this cope with a filename with contiguous spaces?
-                record = line.split()
-                checksumFileCRC = record[-1]
-                fileToHash = ' '.join(record[0:-1])
-                fileToHash = os.path.join(os.path.dirname(checksumFile), \
-                             fileToHash.replace('\\', '/'))
+                # Extracting hash (last 'word' on line) and the file to hash.
+                # Regex is used as basic splitting on space screws up when
+                # there are contiguous spaces. As a capturing group is at the
+                # start, '' is returned in 0
+                match = re.split("^(.*)[ ]+([a-f0-9]{8})$", line, \
+                                flags=re.IGNORECASE)
+                path, checksumFileCRC = match[1], match[2]
+
+                # Coping with nested directories in the path depending on
+                # platform
+                if os.name == 'posix':
+                    path = path.replace('\\', '/')
+                elif os.name == 'nt':
+                    path = path.replace('/', '\\')
+
+                # Constructing full path to hash
+                fileToHash = os.path.join(os.path.dirname(checksumFile),
+                                          path)
 
                 try:
 
@@ -259,11 +275,18 @@ def ChecksumReadMode(files):
         (ignored, extension) = os.path.splitext(passedFile)
 
         if extension == '.md5':
+            print('\nProcessing \'' + passedFile + '\'...\n')
             CheckMD5File(passedFile)
+            fileProcessed = True
 
         if extension == '.sfv':
+            print('\nProcessing \'' + passedFile + '\'...\n')
             CheckSFVFile(passedFile)
+            fileProcessed = True
 
+    # Warning user if no valid files have been detected
+    if fileProcessed == False:
+        print('No valid checksum files have been detected!')
 
 def MD5CreateMode(files):
     raise Exception("Not implemented")
