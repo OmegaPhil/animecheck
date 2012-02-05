@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # TODO: GPL3+?
 
 import codecs
+import hashlib
 import io
 import os
 import re
@@ -30,9 +31,9 @@ import zlib
 from optparse import OptionParser
 
 # Defining terminal escape codes
-c_null = "\x1b[00;00m"
-c_red = "\x1b[31;01m"
-c_green = "\x1b[32;01m"
+h_null = "\x1b[00;00m"
+h_red = "\x1b[31;01m"
+h_green = "\x1b[32;01m"
 p_reset = "\x08" * 8
 
 # Variable declaration
@@ -88,10 +89,52 @@ def CRC32Checksum(filename):
     return "%.8X" % (crc)
 
 
-def DisplayResults(fileToHash, crc, checksumFileCRC=None):
+def MD5Checksum(filename):
+
+    # Variable allocation
+    done = 0
+
+    # Opening file to hash, buffer is large presumably to ensure its read in
+    # fast
+    fileToHash = open(filename, "rb")
+    buff_size = 65536
+    size = os.path.getsize(filename)
+
+    # Preparing md5 hash object
+    md5Hash = hashlib.md5()
+    try:
+        while True:
+
+            # Reading in a chunk of the data and updating the terminal
+            data = fileToHash.read(buff_size)
+            done += buff_size
+
+            # Print digit in 7 character field with right justification
+            sys.stdout.write("%7d" % (done * 100 / size) + "%" + p_reset)
+
+            # Iteratively hashing the data
+            if not data:
+                break
+            md5Hash.update(data)
+
+    # Catching Cntrl+C and exiting
+    except KeyboardInterrupt:
+        sys.stdout.write(p_reset)
+        fileToHash.close()
+        sys.exit(1)
+
+    # Clearing up terminal and file
+    sys.stdout.write(p_reset)
+    fileToHash.close()
+
+    # Returning actual hash
+    return md5Hash.hexdigest()
+
+
+def DisplayResults(fileToHash, obtainedHash, checksumFileHash=None):
 
     # Splitting based on whether a checksum file is being processed or not
-    if checksumFileCRC == None:
+    if checksumFileHash == None:
         try:
 
             # Obtaining the hash from the filename (penultimate fragment) -
@@ -100,42 +143,43 @@ def DisplayResults(fileToHash, crc, checksumFileCRC=None):
                                 flags=re.IGNORECASE)[-2]
 
             # Setting colours depending on good/bad hash
-            if crc == dest_sum.upper():
-                c_in = c_green
+            if obtainedHash == dest_sum.upper():
+                h_in = h_green
             else:
-                c_in = c_red
+                h_in = h_red
 
             # Obtaining a list of the filename before and after the hash
             sfile = fileToHash.split(dest_sum)
 
             # Printing results with coloured hash at the beginning and in
             # the file path
-            print("%s%s%s   %s%s%s%s%s" % (c_in, crc, c_null, sfile[0], \
-                                           c_in, dest_sum, c_null, \
+            print("%s%s%s   %s%s%s%s%s" % (h_in, hash, h_null, sfile[0], \
+                                           h_in, dest_sum, h_null, \
                                            sfile[1]))
 
         except(IndexError, ValueError):
 
             # No CRC32 has been found - outputting calculated value and file
             # path
-            print("%s   %s" % (crc, fileToHash))
+            print("%s   %s" % (obtainedHash, fileToHash))
 
             # If hashes are to be added to filenames, adding to the list
             if options.addHashMode != 'none':
-                hashedFile = [fileToHash, crc]
+                hashedFile = [fileToHash, obtainedHash]
                 addHashModeFiles.append(hashedFile)
     else:
 
-        # crc is from checksum file - setting colours depending on good/bad
-        # hash
-        if crc == checksumFileCRC.upper():
-            c_in = c_green
+        # hash is from checksum file - setting colours depending on good/bad
+        # hash. obtainedHash is uppercased here as md5 hashes are outputted
+        # lowercase
+        if obtainedHash.upper() == checksumFileHash.upper():
+            h_in = h_green
         else:
-            c_in = c_red
+            h_in = h_red
 
         # Printing results with coloured hash at the beginning and in the
         # file path
-        print("%s%s%s   %s" % (c_in, crc, c_null, fileToHash))
+        print("%s%s%s   %s" % (h_in, obtainedHash, h_null, fileToHash))
 
 
 def OpenFile(fileToOpen):
@@ -263,8 +307,53 @@ def CheckSFVFile(checksumFile):
 
 
 def CheckMD5File(checksumFile):
-    raise Exception("Not implemented")
-    # TODO:
+    try:
+
+        # Opening file, resulting in usable text regardless of original
+        # encoding
+        fileData = OpenFile(checksumFile)
+
+        # Looping through all lines
+        for line in fileData:
+
+            # Ignoring comments
+            if line[0] != ';':
+
+                # Extracting hash (last 'word' on line) and the file to hash.
+                # Regex is used as basic splitting on space screws up when
+                # there are contiguous spaces. As a capturing group is at the
+                # start, '' is returned in 0
+                match = re.split("^([a-f0-9]{32})[ ]+\*(.*)$", line, \
+                                flags=re.IGNORECASE)
+                path, checksumFileMD5 = match[2], match[1]
+
+                # Coping with nested directories in the path depending on
+                # platform
+                if os.name == 'posix':
+                    path = path.replace('\\', '/')
+                elif os.name == 'nt':
+                    path = path.replace('/', '\\')
+
+                # Constructing full path to hash
+                fileToHash = os.path.join(os.path.dirname(checksumFile),
+                                          path)
+
+                try:
+
+                    # Hashing file
+                    md5 = MD5Checksum(fileToHash)
+
+                    # Displaying results
+                    DisplayResults(fileToHash, md5, checksumFileMD5)
+
+                except(Exception) as e:
+                    sys.stderr.write('Failed to hash \'%s\':\n%s\n' % \
+                                     (fileToHash, e))
+                    continue
+
+    except(Exception) as e:
+        sys.stderr.write('Failed to process the checksum file \'%s\':\n%s\n'\
+                         % (checksumFile, e))
 
 
 def ChecksumReadMode(files):
