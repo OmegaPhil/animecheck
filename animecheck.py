@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-# TODO: GPL3+?
+# TODO: GPL3+? Original author hasn't responded to emails
 
 import codecs
 import hashlib
@@ -28,6 +28,7 @@ import re
 import shutil
 import sys
 import zlib
+from datetime import datetime
 from optparse import OptionParser
 
 # Defining terminal escape codes
@@ -38,6 +39,7 @@ p_reset = "\x08" * 8
 
 # Variable declaration
 addHashModeFiles = []
+version = '0.3'
 
 
 def CRC32Checksum(filename):
@@ -60,7 +62,12 @@ def CRC32Checksum(filename):
             done += buff_size
 
             # Print digit in 7 character field with right justification
-            sys.stdout.write("%7d" % (done * 100 / size) + "%" + p_reset)
+            if size > 0:
+                sys.stdout.write("%7d" % (done * 100 / size) + "%" + p_reset)
+                pass
+            else:
+                sys.stdout.write("%7d" % (100) + "%" + p_reset)
+                pass
 
             # Iteratively hashing the data
             if not data:
@@ -110,7 +117,10 @@ def MD5Checksum(filename):
             done += buff_size
 
             # Print digit in 7 character field with right justification
-            sys.stdout.write("%7d" % (done * 100 / size) + "%" + p_reset)
+            if size > 0:
+                sys.stdout.write("%7d" % (done * 100 / size) + "%" + p_reset)
+            else: 
+                sys.stdout.write("%7d" % (100) + "%" + p_reset)
 
             # Iteratively hashing the data
             if not data:
@@ -153,7 +163,7 @@ def DisplayResults(fileToHash, obtainedHash, checksumFileHash=None):
 
             # Printing results with coloured hash at the beginning and in
             # the file path
-            print("%s%s%s   %s%s%s%s%s" % (h_in, hash, h_null, sfile[0], \
+            print("%s%s%s   %s%s%s%s%s" % (h_in, obtainedHash, h_null, sfile[0], \
                                            h_in, dest_sum, h_null, \
                                            sfile[1]))
 
@@ -180,6 +190,56 @@ def DisplayResults(fileToHash, obtainedHash, checksumFileHash=None):
         # Printing results with coloured hash at the beginning and in the
         # file path
         print("%s%s%s   %s" % (h_in, obtainedHash, h_null, fileToHash))
+
+
+def NormaliseAndValidateFiles(files, checksumType):
+
+    # Normalising the file paths to ensure all inputs are absolute paths
+    normalisedFiles = []
+    for fileToHash in files:
+        normalisedFiles.append(os.path.abspath(fileToHash))
+
+    # Debug code
+    #print(normalisedFiles)
+
+    # Obtaining common directory root
+    commonPrefix = os.path.commonprefix(normalisedFiles)
+
+    # Ensuring files share a common directory root
+    if commonPrefix == '':
+
+        # If the commonPrefix is blank there is a chance all files are in the
+        # current directory - making sure this is the case
+        for fileToHash in normalisedFiles:
+            if not os.path.isfile(fileToHash):
+                sys.stderr.write('%s\n%s create mode was requested, but the \
+passed files to hash do not share a common root directory:\n\n%s\n' % \
+                (parser.get_usage(), checksumType, normalisedFiles))
+                sys.exit(1)
+
+        # It is - setting commonPrefix appropriately (curdir is just '.' -
+        # forcing it into a usable path)
+        commonPrefix = os.path.abspath(os.curdir)
+
+    # If the prefix is actually a file, fixing. The common prefix could also be
+    # a directory structure then a common part of the filename - attempting
+    # to resolve to the underlying directory
+    if not os.path.isdir(commonPrefix):
+        commonPrefix = os.path.dirname(commonPrefix)
+
+    # Ensuring common directory root is valid
+    if not os.path.isdir(commonPrefix):
+        sys.stderr.write('%s\n%s create mode was requested, but the \
+calculated common root directory (\'%s\') of the passed files to hash is not \
+valid:\n\n%s\n' % (parser.get_usage(), checksumType, commonPrefix, \
+                   normalisedFiles))
+        sys.exit(1)
+
+    # Making sure that commonPrefix doesnt have a trailing slash
+    if commonPrefix[-1:] == os.sep: commonPrefix = commonPrefix[:-1]
+
+    # Returning results
+    return normalisedFiles, commonPrefix
 
 
 def OpenFile(fileToOpen):
@@ -358,10 +418,13 @@ def CheckMD5File(checksumFile):
 
 def ChecksumReadMode(files):
 
+    # Variable allocation
+    fileProcessed = False
+
     # Looping for all files passed to detect checksum files and then calling
     # the relevant procedure
     for passedFile in files:
-        (ignored, extension) = os.path.splitext(passedFile)
+        extension = os.path.splitext(passedFile)[1]
 
         if extension == '.md5':
             print('\nProcessing \'' + passedFile + '\'...\n')
@@ -377,14 +440,126 @@ def ChecksumReadMode(files):
     if fileProcessed == False:
         print('No valid checksum files have been detected!')
 
+
 def MD5CreateMode(files):
-    raise Exception("Not implemented")
-    # TODO:
 
+    try:
 
+        # Preparing checksumFile
+        checksumFile = None
+
+        # Normalising and validating passed files
+        files, commonPrefix = NormaliseAndValidateFiles(files, 'md5')
+
+        # Debug code
+        #print commonPrefix
+        #print os.path.basename(commonPrefix[:-1])
+
+        # Setting checksumFileOutput. Basename implementation is broken,
+        # removing trailing os.sep to make it work...
+        if options.checksumOutput != None:
+            checksumFileOutput = options.checksumOutput
+        else:
+            checksumFileOutput = commonPrefix + os.sep + \
+            os.path.basename(commonPrefix) + '.md5'
+
+        # Debug code
+        #print checksumFileOutput
+
+        # Writing out header to checksum file
+        checksumFile = open(checksumFileOutput, 'w')
+        checksumFile.writelines('; Generated by %s v%s on %s' % (\
+            os.path.split(sys.argv[0])[1], version, \
+            datetime.now().isoformat() + \
+            '\n;\n'))
+
+        # Looping for all files to hash
+        for fileToHash in files:
+
+            # Removing common root directory from file path (first item in the
+            # list will be empty). Removing directory slash as needed
+            relativePath = fileToHash.split(commonPrefix)[1]
+            if relativePath[:1] == os.sep: relativePath = relativePath[1:]
+
+            # Obtaining file hash
+            fileHash = MD5Checksum(fileToHash)
+
+            # Writing out file record
+            checksumFile.write(fileHash + ' *' + relativePath + '\n')
+
+        # Notifying user that checksum file has been written successfully
+        print('\nChecksum file \'' + checksumFileOutput + '\' has been written \
+ successfully')
+
+    except(Exception) as e:
+        sys.stderr.write('Failed to write to the checksum file \'%s\':\n%s\n'\
+                         % (checksumFileOutput, e))
+        sys.exit(1)
+
+    finally:
+
+        # Closing file
+        if not checksumFile is None: checksumFile.close()
+        
+    
 def SFVCreateMode(files):
-    raise Exception("Not implemented")
-    # TODO:
+
+    try:
+        
+        # Preparing checksumFile
+        checksumFile = None
+        
+        # Normalising and validating passed files
+        files, commonPrefix = NormaliseAndValidateFiles(files, 'sfv')
+
+        # Debug code
+#        print commonPrefix
+#        print os.path.basename(commonPrefix)
+#        print files
+
+        # Setting checksumFileOutput. Basename implementation is broken,
+        # removing trailing os.sep to make it work...
+        if options.checksumOutput != None:
+            checksumFileOutput = options.checksumOutput
+        else:
+            checksumFileOutput = commonPrefix + os.sep + \
+            os.path.basename(commonPrefix) + '.sfv'
+    
+        # Writing out header to checksum file
+        checksumFile = open(checksumFileOutput, 'w')
+        checksumFile.writelines('; Generated by %s v%s on %s' % (\
+            os.path.split(sys.argv[0])[1], version, \
+            datetime.now().isoformat() + \
+            '\n;\n'))
+    
+        # Looping for all files to hash
+        for fileToHash in files:
+    
+            # Removing common root directory from file path (first item in the
+            # list will be empty). Removing directory slash as needed
+            relativePath = fileToHash.split(commonPrefix)[1]
+            if relativePath[:1] == os.sep: relativePath = relativePath[1:]
+    
+            # Obtaining file hash
+            fileHash = CRC32Checksum(fileToHash)
+    
+            # Writing out file record
+            checksumFile.write(relativePath + ' ' + fileHash + '\n')
+    
+        # Notifying user that checksum file has been written successfully
+        print('\nChecksum file \'' + checksumFileOutput + '\' has been written \
+successfully')
+
+    except(Exception) as e:
+        sys.stderr.write('Failed to write to the checksum file \'%s\':\n%s\n'\
+                         % (checksumFileOutput, e))
+        sys.exit(1)
+
+    finally:
+
+        # Closing file
+        if not checksumFile is None: checksumFile.close()
+
 
 # Configuring and parsing passed options
 parser = OptionParser()
@@ -402,6 +577,10 @@ metavar='sfvCreateMode', action='store_true', default=False)
 parser.add_option('-m', '--md5-create-mode', dest='md5CreateMode', \
 help='mode to create an md5 file based on hashing the files passed', \
 metavar='md5CreateMode', action='store_true', default=False)
+parser.add_option('-o', '--checksum-output', dest='checksumOutput', \
+help='path to output checksum file to (only valid in checksum file creation \
+modes). If omitted, the file is output to the hashed files\' common root \
+directory', metavar='checksumOutput')
 (options, args) = parser.parse_args()
 
 # Validating options
@@ -450,3 +629,5 @@ else:
 
 
 # TODO: Add ed2k hashing if possible?
+# TODO: Proper information display during hashing
+# TODO: Summary of successful and failed hashes including files not found when processing checksum files and general CRC32 hashing mode
