@@ -119,7 +119,7 @@ def MD5Checksum(filename):
             # Print digit in 7 character field with right justification
             if size > 0:
                 sys.stdout.write("%7d" % (done * 100 / size) + "%" + p_reset)
-            else: 
+            else:
                 sys.stdout.write("%7d" % (100) + "%" + p_reset)
 
             # Iteratively hashing the data
@@ -149,7 +149,7 @@ def DisplayResults(fileToHash, obtainedHash, checksumFileHash=None):
 
             # Obtaining the hash from the filename (penultimate fragment) -
             # remember that re does not support POSIX character classes
-            dest_sum = re.split('([a-f0-9]{8})', fileToHash, \
+            dest_sum = re.split('([a-f0-9]{8})', fileToHash,
                                 flags=re.IGNORECASE)[-2]
 
             # Setting colours depending on good/bad hash
@@ -163,8 +163,8 @@ def DisplayResults(fileToHash, obtainedHash, checksumFileHash=None):
 
             # Printing results with coloured hash at the beginning and in
             # the file path
-            print("%s%s%s   %s%s%s%s%s" % (h_in, obtainedHash, h_null, sfile[0], \
-                                           h_in, dest_sum, h_null, \
+            print("%s%s%s   %s%s%s%s%s" % (h_in, obtainedHash, h_null,
+                                           sfile[0], h_in, dest_sum, h_null,
                                            sfile[1]))
 
         except(IndexError, ValueError):
@@ -213,7 +213,7 @@ def NormaliseAndValidateFiles(files, checksumType):
         for fileToHash in normalisedFiles:
             if not os.path.isfile(fileToHash):
                 sys.stderr.write('%s\n%s create mode was requested, but the \
-passed files to hash do not share a common root directory:\n\n%s\n' % \
+passed files to hash do not share a common root directory:\n\n%s\n' %
                 (parser.get_usage(), checksumType, normalisedFiles))
                 sys.exit(1)
 
@@ -231,7 +231,7 @@ passed files to hash do not share a common root directory:\n\n%s\n' % \
     if not os.path.isdir(commonPrefix):
         sys.stderr.write('%s\n%s create mode was requested, but the \
 calculated common root directory (\'%s\') of the passed files to hash is not \
-valid:\n\n%s\n' % (parser.get_usage(), checksumType, commonPrefix, \
+valid:\n\n%s\n' % (parser.get_usage(), checksumType, commonPrefix,
                    normalisedFiles))
         sys.exit(1)
 
@@ -287,9 +287,10 @@ def CRC32HashMode(files):
 
     # If files without hashes exist and the add hash mode is 'ask', proceeding
     # only if the user wants to
-    if len(addHashModeFiles) > 0 and options.addHashMode == 'ask' and \
-    raw_input('\nDo you want to add CRC32 hashes to the filenames of files \
-without them (y/n)?').lower() != 'y':
+    if (len(addHashModeFiles) > 0
+        and options.addHashMode == 'ask'
+        and raw_input('\nDo you want to add CRC32 hashes to the filenames of'
+        ' files without them (y/n)?').lower() != 'y'):
         print('Hashes will not be added to files without them')
         sys.exit()
 
@@ -306,13 +307,13 @@ without them (y/n)?').lower() != 'y':
             # before the first fullstop in a filename - however my usage will
             # not include files with more than one fullstop
             filePath = \
-            os.path.join(filePath, fileName + ' [' + hashedFile[1] + ']' + \
+            os.path.join(filePath, fileName + ' [' + hashedFile[1] + ']' +
                          fileExtension)
             shutil.move(hashedFile[0], filePath)
 
         except(Exception) as e:
-            sys.stderr.write('Addition of CRC32 hash \'%s\' to the filename of\
- \'%s\' failed: %s' % (crc, file, e))
+            sys.stderr.write('Addition of CRC32 hash \'%s\' to the filename of'
+                             ' \'%s\' failed: %s' % (crc, file, e))
             continue
 
 
@@ -333,7 +334,7 @@ def CheckSFVFile(checksumFile):
                 # Regex is used as basic splitting on space screws up when
                 # there are contiguous spaces. As a capturing group is at the
                 # start, '' is returned in 0
-                match = re.split("^(.*)[ ]+([a-f0-9]{8})$", line, \
+                match = re.split("^(.*)[ ]+([a-f0-9]{8})$", line,
                                 flags=re.IGNORECASE)
                 path, checksumFileCRC = match[1], match[2]
 
@@ -357,12 +358,12 @@ def CheckSFVFile(checksumFile):
                     DisplayResults(fileToHash, crc, checksumFileCRC)
 
                 except(Exception) as e:
-                    sys.stderr.write('Failed to hash \'%s\':\n%s\n' % \
+                    sys.stderr.write('Failed to hash \'%s\':\n%s\n' %
                                      (fileToHash, e))
                     continue
 
     except(Exception) as e:
-        sys.stderr.write('Failed to process the checksum file \'%s\':\n%s\n'\
+        sys.stderr.write('Failed to process the checksum file \'%s\':\n%s\n'
                          % (checksumFile, e))
 
 
@@ -383,7 +384,7 @@ def CheckMD5File(checksumFile):
                 # Regex is used as basic splitting on space screws up when
                 # there are contiguous spaces. As a capturing group is at the
                 # start, '' is returned in 0
-                match = re.split("^([a-f0-9]{32})[ ]+\*(.*)$", line, \
+                match = re.split("^([a-f0-9]{32})[ ]+\*(.*)$", line,
                                 flags=re.IGNORECASE)
                 path, checksumFileMD5 = match[2], match[1]
 
@@ -407,12 +408,12 @@ def CheckMD5File(checksumFile):
                     DisplayResults(fileToHash, md5, checksumFileMD5)
 
                 except(Exception) as e:
-                    sys.stderr.write('Failed to hash \'%s\':\n%s\n' % \
+                    sys.stderr.write('Failed to hash \'%s\':\n%s\n' %
                                      (fileToHash, e))
                     continue
 
     except(Exception) as e:
-        sys.stderr.write('Failed to process the checksum file \'%s\':\n%s\n'\
+        sys.stderr.write('Failed to process the checksum file \'%s\':\n%s\n'
                          % (checksumFile, e))
 
 
@@ -460,18 +461,17 @@ def MD5CreateMode(files):
         if options.checksumOutput != None:
             checksumFileOutput = options.checksumOutput
         else:
-            checksumFileOutput = commonPrefix + os.sep + \
-            os.path.basename(commonPrefix) + '.md5'
+            checksumFileOutput = (commonPrefix + os.sep +
+            os.path.basename(commonPrefix) + '.md5')
 
         # Debug code
         #print checksumFileOutput
 
         # Writing out header to checksum file
         checksumFile = open(checksumFileOutput, 'w')
-        checksumFile.writelines('; Generated by %s v%s on %s' % (\
-            os.path.split(sys.argv[0])[1], version, \
-            datetime.now().isoformat() + \
-            '\n;\n'))
+        checksumFile.writelines('; Generated by %s v%s on %s' %
+            (os.path.split(sys.argv[0])[1], version,
+            datetime.now().isoformat() + '\n;\n'))
 
         # Looping for all files to hash
         for fileToHash in files:
@@ -488,11 +488,11 @@ def MD5CreateMode(files):
             checksumFile.write(fileHash + ' *' + relativePath + '\n')
 
         # Notifying user that checksum file has been written successfully
-        print('\nChecksum file \'' + checksumFileOutput + '\' has been written \
- successfully')
+        print('\nChecksum file \'' + checksumFileOutput + '\' has been written'
+              ' successfully')
 
     except(Exception) as e:
-        sys.stderr.write('Failed to write to the checksum file \'%s\':\n%s\n'\
+        sys.stderr.write('Failed to write to the checksum file \'%s\':\n%s\n'
                          % (checksumFileOutput, e))
         sys.exit(1)
 
@@ -522,15 +522,14 @@ def SFVCreateMode(files):
         if options.checksumOutput != None:
             checksumFileOutput = options.checksumOutput
         else:
-            checksumFileOutput = commonPrefix + os.sep + \
-            os.path.basename(commonPrefix) + '.sfv'
+            checksumFileOutput = (commonPrefix + os.sep +
+            os.path.basename(commonPrefix) + '.sfv')
     
         # Writing out header to checksum file
         checksumFile = open(checksumFileOutput, 'w')
-        checksumFile.writelines('; Generated by %s v%s on %s' % (\
-            os.path.split(sys.argv[0])[1], version, \
-            datetime.now().isoformat() + \
-            '\n;\n'))
+        checksumFile.writelines('; Generated by %s v%s on %s' %
+            (os.path.split(sys.argv[0])[1], version,
+            datetime.now().isoformat() + '\n;\n'))
     
         # Looping for all files to hash
         for fileToHash in files:
@@ -547,11 +546,11 @@ def SFVCreateMode(files):
             checksumFile.write(relativePath + ' ' + fileHash + '\n')
     
         # Notifying user that checksum file has been written successfully
-        print('\nChecksum file \'' + checksumFileOutput + '\' has been written \
-successfully')
+        print('\nChecksum file \'' + checksumFileOutput + '\' has been written '
+              'successfully')
 
     except(Exception) as e:
-        sys.stderr.write('Failed to write to the checksum file \'%s\':\n%s\n'\
+        sys.stderr.write('Failed to write to the checksum file \'%s\':\n%s\n'
                          % (checksumFileOutput, e))
         sys.exit(1)
 
@@ -563,30 +562,32 @@ successfully')
 
 # Configuring and parsing passed options
 parser = OptionParser()
-parser.add_option('-a', '--add-hash-mode', dest='addHashMode', help='mode to \
-define when a CRC32 hash is added to a filename where none has been found. \
-Defaults to \'none\', \'ask\' prompts the user after hashing and \'always\' \
-causes the hash to automatically be added when missing', \
+parser.add_option('-a', '--add-hash-mode', dest='addHashMode', help='mode to '
+'define when a CRC32 hash is added to a filename where none has been found. '
+'Defaults to \'none\', \'ask\' prompts the user after hashing and \'always\' '
+'causes the hash to automatically be added when missing',
 metavar='addHashMode', choices=('none', 'ask', 'always'), default='none')
-parser.add_option('-c', '--checksum-read-mode', dest='checksumReadMode', \
+parser.add_option('-c', '--checksum-read-mode', dest='checksumReadMode',
 help='mode to look for checksum files and then hash the files as \
 described', metavar='checksumMode', action='store_true', default=False)
-parser.add_option('-s', '--sfv-create-mode', dest='sfvCreateMode', help=' mode\
- to create an sfv file based on hashing the files passed', \
+parser.add_option('-s', '--sfv-create-mode', dest='sfvCreateMode', help=' mode'
+' to create an sfv file based on hashing the files passed',
 metavar='sfvCreateMode', action='store_true', default=False)
-parser.add_option('-m', '--md5-create-mode', dest='md5CreateMode', \
-help='mode to create an md5 file based on hashing the files passed', \
+parser.add_option('-m', '--md5-create-mode', dest='md5CreateMode',
+help='mode to create an md5 file based on hashing the files passed',
 metavar='md5CreateMode', action='store_true', default=False)
-parser.add_option('-o', '--checksum-output', dest='checksumOutput', \
-help='path to output checksum file to (only valid in checksum file creation \
-modes). If omitted, the file is output to the hashed files\' common root \
-directory', metavar='checksumOutput')
+parser.add_option('-o', '--checksum-output', dest='checksumOutput',
+help='path to output checksum file to (only valid in checksum file creation '
+'modes). If omitted, the file is output to the hashed files\' common root '
+'directory', metavar='checksumOutput')
 (options, args) = parser.parse_args()
 
 # Validating options
 # Ensuring no other modes are enabled when add-hash-mode is
-if options.addHashMode != 'none' and (options.checksumReadMode or \
-options.md5CreateMode or options.sfvCreateMode):
+if (options.addHashMode != 'none'
+    and (options.checksumReadMode
+    or options.md5CreateMode
+    or options.sfvCreateMode)):
     sys.stderr.write(parser.get_usage() + '\nadd-hash-mode can only be used \
 when no other modes are enabled\n')
     sys.exit(1)
