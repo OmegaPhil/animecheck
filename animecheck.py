@@ -281,8 +281,9 @@ def CRC32HashMode(files):
             # Displaying results
             DisplayResults(fileToHash, crc)
 
-        except(IOError) as e:
-            sys.stderr.write('\n' + str(e) + '\n')
+        except IOError as e:
+            sys.stderr.write('\nFailed to hash the file \'%s\':\n\n%s\n' %
+                             (fileToHash, e))
             continue
 
     # If files without hashes exist and the add hash mode is 'ask', proceeding
@@ -311,7 +312,7 @@ def CRC32HashMode(files):
                          fileExtension)
             shutil.move(hashedFile[0], filePath)
 
-        except(Exception) as e:
+        except Exception as e:
             sys.stderr.write('Addition of CRC32 hash \'%s\' to the filename of'
                              ' \'%s\' failed: %s' % (crc, file, e))
             continue
@@ -357,12 +358,12 @@ def CheckSFVFile(checksumFile):
                     # Displaying results
                     DisplayResults(fileToHash, crc, checksumFileCRC)
 
-                except(Exception) as e:
+                except Exception as e:
                     sys.stderr.write('Failed to hash \'%s\':\n%s\n' %
                                      (fileToHash, e))
                     continue
 
-    except(Exception) as e:
+    except Exception  as e:
         sys.stderr.write('Failed to process the checksum file \'%s\':\n%s\n'
                          % (checksumFile, e))
 
@@ -407,12 +408,12 @@ def CheckMD5File(checksumFile):
                     # Displaying results
                     DisplayResults(fileToHash, md5, checksumFileMD5)
 
-                except(Exception) as e:
+                except Exception as e:
                     sys.stderr.write('Failed to hash \'%s\':\n%s\n' %
                                      (fileToHash, e))
                     continue
 
-    except(Exception) as e:
+    except Exception as e:
         sys.stderr.write('Failed to process the checksum file \'%s\':\n%s\n'
                          % (checksumFile, e))
 
@@ -491,7 +492,7 @@ def MD5CreateMode(files):
         print('\nChecksum file \'' + checksumFileOutput + '\' has been written'
               ' successfully')
 
-    except(Exception) as e:
+    except Exception as e:
         sys.stderr.write('Failed to write to the checksum file \'%s\':\n%s\n'
                          % (checksumFileOutput, e))
         sys.exit(1)
@@ -549,7 +550,7 @@ def SFVCreateMode(files):
         print('\nChecksum file \'' + checksumFileOutput + '\' has been written '
               'successfully')
 
-    except(Exception) as e:
+    except Exception as e:
         sys.stderr.write('Failed to write to the checksum file \'%s\':\n%s\n'
                          % (checksumFileOutput, e))
         sys.exit(1)
