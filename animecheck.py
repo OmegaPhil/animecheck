@@ -35,17 +35,17 @@ from datetime import datetime
 from optparse import OptionParser
 
 # Defining terminal escape codes
-h_null = "\x1b[00;00m"
-h_red = "\x1b[31;01m"
-h_green = "\x1b[32;01m"
-p_reset = "\x08" * 8
+H_NULL = "\x1b[00;00m"
+H_RED = "\x1b[31;01m"
+H_GREEN = "\x1b[32;01m"
+P_RESET = "\x08" * 8
 
 # Variable declaration
 addHashModeFiles = []
-version = '0.3'
+VERSION = '0.3'
 
 
-def CRC32Checksum(filename):
+def crc32_checksum(filename):
 
     # Variable allocation
     crc = 0
@@ -66,10 +66,10 @@ def CRC32Checksum(filename):
 
             # Print digit in 7 character field with right justification
             if size > 0:
-                sys.stdout.write("%7d" % (done * 100 / size) + "%" + p_reset)
+                sys.stdout.write("%7d" % (done * 100 / size) + "%" + P_RESET)
                 pass
             else:
-                sys.stdout.write("%7d" % (100) + "%" + p_reset)
+                sys.stdout.write("%7d" % (100) + "%" + P_RESET)
                 pass
 
             # Iteratively hashing the data
@@ -79,12 +79,12 @@ def CRC32Checksum(filename):
 
     # Catching Cntrl+C and exiting
     except KeyboardInterrupt:
-        sys.stdout.write(p_reset)
+        sys.stdout.write(P_RESET)
         fileToHash.close()
         sys.exit(1)
 
     # Clearing up terminal and file
-    sys.stdout.write(p_reset)
+    sys.stdout.write(P_RESET)
     fileToHash.close()
 
     # If the crc hex value is negative, bitwise and it with the maximum 32bit
@@ -99,7 +99,7 @@ def CRC32Checksum(filename):
     return "%.8X" % (crc)
 
 
-def MD5Checksum(filename):
+def md5_checksum(filename):
 
     # Variable allocation
     done = 0
@@ -121,9 +121,9 @@ def MD5Checksum(filename):
 
             # Print digit in 7 character field with right justification
             if size > 0:
-                sys.stdout.write("%7d" % (done * 100 / size) + "%" + p_reset)
+                sys.stdout.write("%7d" % (done * 100 / size) + "%" + P_RESET)
             else:
-                sys.stdout.write("%7d" % (100) + "%" + p_reset)
+                sys.stdout.write("%7d" % (100) + "%" + P_RESET)
 
             # Iteratively hashing the data
             if not data:
@@ -132,19 +132,19 @@ def MD5Checksum(filename):
 
     # Catching Cntrl+C and exiting
     except KeyboardInterrupt:
-        sys.stdout.write(p_reset)
+        sys.stdout.write(P_RESET)
         fileToHash.close()
         sys.exit(1)
 
     # Clearing up terminal and file
-    sys.stdout.write(p_reset)
+    sys.stdout.write(P_RESET)
     fileToHash.close()
 
     # Returning actual hash
     return md5Hash.hexdigest()
 
 
-def ED2kLink(filename):
+def ed2k_link(filename):
     """ Returns the ed2k hash of a given file. """
 
     # Based on radicand's code:
@@ -206,39 +206,39 @@ def ED2kLink(filename):
                     # Print digit in 7 character field with right justification
                     if fileSize > 0:
                         sys.stdout.write("%7d" % (done * 100 / fileSize) + "%"
-                                         + p_reset)
+                                         + P_RESET)
                     else:
-                        sys.stdout.write("%7d" % (100) + "%" + p_reset)
+                        sys.stdout.write("%7d" % (100) + "%" + P_RESET)
 
                 # Yielding or exiting based on whether the current block of data
                 # is empty. As this is a generator function and currentBlockData
                 # accrues data, unless it is cleared before yielding, its contents
-                # will persist  
+                # will persist
                 if currentBlockData:
                     dataToReturn = currentBlockData
-                    currentBlockData = '' 
+                    currentBlockData = ''
                     yield dataToReturn
                 else: return
-               
+
             # Catching Cntrl+C and exiting
             except KeyboardInterrupt:
-                sys.stdout.write(p_reset)
+                sys.stdout.write(P_RESET)
                 f.close()
                 sys.exit(1)
- 
+
     def md4_hash(data):
         try:
-            
+
             # Hashing passed block
             m = md4()
             m.update(data)
-    
+
             # Returning hash
             return m
-        
+
         # Catching Cntrl+C and exiting
         except KeyboardInterrupt:
-            sys.stdout.write(p_reset)
+            sys.stdout.write(P_RESET)
             f.close()
             sys.exit(1)
 
@@ -257,11 +257,11 @@ def ED2kLink(filename):
 
         # Returning ed2k link
         # E.g.: 'ed2k://|file|The_Two_Towers-The_Purist_Edit-Trailer.avi|14997504|965c013e991ee246d63d45ea71954c4d|/'
-        return ('ed2k://|file|%s|%d|%s|/' % 
+        return ('ed2k://|file|%s|%d|%s|/' %
                 (os.path.basename(filename).replace(' ', '_'), fileSize, ed2kHash))
-        
+     
 
-def DisplayResults(fileToHash, obtainedHash, checksumFileHash=None):
+def display_results(fileToHash, obtainedHash, checksumFileHash=None):
 
     # Splitting based on whether a checksum file is being processed or not
     if checksumFileHash == None:
@@ -274,17 +274,17 @@ def DisplayResults(fileToHash, obtainedHash, checksumFileHash=None):
 
             # Setting colours depending on good/bad hash
             if obtainedHash == dest_sum.upper():
-                h_in = h_green
+                h_in = H_GREEN
             else:
-                h_in = h_red
+                h_in = H_RED
 
             # Obtaining a list of the filename before and after the hash
             sfile = fileToHash.split(dest_sum)
 
             # Printing results with coloured hash at the beginning and in
             # the file path
-            print("%s%s%s   %s%s%s%s%s" % (h_in, obtainedHash, h_null,
-                                           sfile[0], h_in, dest_sum, h_null,
+            print("%s%s%s   %s%s%s%s%s" % (h_in, obtainedHash, H_NULL,
+                                           sfile[0], h_in, dest_sum, H_NULL,
                                            sfile[1]))
 
         except(IndexError, ValueError):
@@ -303,16 +303,16 @@ def DisplayResults(fileToHash, obtainedHash, checksumFileHash=None):
         # hash. obtainedHash is uppercased here as md5 hashes are outputted
         # lowercase
         if obtainedHash.upper() == checksumFileHash.upper():
-            h_in = h_green
+            h_in = H_GREEN
         else:
-            h_in = h_red
+            h_in = H_RED
 
         # Printing results with coloured hash at the beginning and in the
         # file path
-        print("%s%s%s   %s" % (h_in, obtainedHash, h_null, fileToHash))
+        print("%s%s%s   %s" % (h_in, obtainedHash, H_NULL, fileToHash))
 
 
-def NormaliseAndValidateFiles(files, checksumType):
+def normalise_and_validate_files(files, checksumType):
 
     # Normalising the file paths to ensure all inputs are absolute paths
     normalisedFiles = []
@@ -362,7 +362,7 @@ valid:\n\n%s\n' % (parser.get_usage(), checksumType, commonPrefix,
     return normalisedFiles, commonPrefix
 
 
-def OpenFile(fileToOpen):
+def open_file(fileToOpen):
 
     # Custom function has been created as Python, even though it is 'unicode
     # capable', cannot cope with Just Reading a UTF-16 file (so far)
@@ -388,7 +388,7 @@ def OpenFile(fileToOpen):
     return io.StringIO(fileData, None)
 
 
-def CRC32HashMode(files):
+def crc32_hash_mode(files):
 
     # Looping for all passed files - these are left over in args after the
     # options have been processed
@@ -396,10 +396,10 @@ def CRC32HashMode(files):
         try:
 
             # Hashing file
-            crc = CRC32Checksum(fileToHash)
+            crc = crc32_checksum(fileToHash)
 
             # Displaying results
-            DisplayResults(fileToHash, crc)
+            display_results(fileToHash, crc)
 
         except IOError as e:
             sys.stderr.write('\nFailed to hash the file \'%s\':\n\n%s\n' %
@@ -438,12 +438,12 @@ def CRC32HashMode(files):
             continue
 
 
-def CheckSFVFile(checksumFile):
+def check_sfv_file(checksumFile):
     try:
 
         # Opening file, resulting in usable text regardless of original
         # encoding
-        fileData = OpenFile(checksumFile)
+        fileData = open_file(checksumFile)
 
         # Looping through all lines
         for line in fileData:
@@ -473,10 +473,10 @@ def CheckSFVFile(checksumFile):
                 try:
 
                     # Hashing file
-                    crc = CRC32Checksum(fileToHash)
+                    crc = crc32_checksum(fileToHash)
 
                     # Displaying results
-                    DisplayResults(fileToHash, crc, checksumFileCRC)
+                    display_results(fileToHash, crc, checksumFileCRC)
 
                 except Exception as e:
                     sys.stderr.write('Failed to hash \'%s\':\n%s\n' %
@@ -488,12 +488,12 @@ def CheckSFVFile(checksumFile):
                          % (checksumFile, e))
 
 
-def CheckMD5File(checksumFile):
+def check_md5_file(checksumFile):
     try:
 
         # Opening file, resulting in usable text regardless of original
         # encoding
-        fileData = OpenFile(checksumFile)
+        fileData = open_file(checksumFile)
 
         # Looping through all lines
         for line in fileData:
@@ -523,10 +523,10 @@ def CheckMD5File(checksumFile):
                 try:
 
                     # Hashing file
-                    md5 = MD5Checksum(fileToHash)
+                    md5 = md5_checksum(fileToHash)
 
                     # Displaying results
-                    DisplayResults(fileToHash, md5, checksumFileMD5)
+                    display_results(fileToHash, md5, checksumFileMD5)
 
                 except Exception as e:
                     sys.stderr.write('Failed to hash \'%s\':\n%s\n' %
@@ -538,7 +538,7 @@ def CheckMD5File(checksumFile):
                          % (checksumFile, e))
 
 
-def ChecksumReadMode(files):
+def checksum_read_mode(files):
 
     # Variable allocation
     fileProcessed = False
@@ -550,12 +550,12 @@ def ChecksumReadMode(files):
 
         if extension == '.md5':
             print('\nProcessing \'' + passedFile + '\'...\n')
-            CheckMD5File(passedFile)
+            check_md5_file(passedFile)
             fileProcessed = True
 
         if extension == '.sfv':
             print('\nProcessing \'' + passedFile + '\'...\n')
-            CheckSFVFile(passedFile)
+            check_sfv_file(passedFile)
             fileProcessed = True
 
     # Warning user if no valid files have been detected
@@ -563,7 +563,7 @@ def ChecksumReadMode(files):
         print('No valid checksum files have been detected!')
 
 
-def MD5CreateMode(files):
+def md5_create_mode(files):
 
     try:
 
@@ -571,7 +571,7 @@ def MD5CreateMode(files):
         checksumFile = None
 
         # Normalising and validating passed files
-        files, commonPrefix = NormaliseAndValidateFiles(files, 'md5')
+        files, commonPrefix = normalise_and_validate_files(files, 'md5')
 
         # Debug code
         #print commonPrefix
@@ -591,7 +591,7 @@ def MD5CreateMode(files):
         # Writing out header to checksum file
         checksumFile = open(checksumFileOutput, 'w')
         checksumFile.writelines('; Generated by %s v%s on %s' %
-            (os.path.split(sys.argv[0])[1], version,
+            (os.path.split(sys.argv[0])[1], VERSION,
             datetime.now().isoformat() + '\n;\n'))
 
         # Looping for all files to hash
@@ -603,7 +603,7 @@ def MD5CreateMode(files):
             if relativePath[:1] == os.sep: relativePath = relativePath[1:]
 
             # Obtaining file hash
-            fileHash = MD5Checksum(fileToHash)
+            fileHash = md5_checksum(fileToHash)
 
             # Writing out file record
             checksumFile.write(fileHash + ' *' + relativePath + '\n')
@@ -621,17 +621,17 @@ def MD5CreateMode(files):
 
         # Closing file
         if not checksumFile is None: checksumFile.close()
-        
-    
-def SFVCreateMode(files):
+
+
+def sfv_create_mode(files):
 
     try:
-        
+
         # Preparing checksumFile
         checksumFile = None
-        
+
         # Normalising and validating passed files
-        files, commonPrefix = NormaliseAndValidateFiles(files, 'sfv')
+        files, commonPrefix = normalise_and_validate_files(files, 'sfv')
 
         # Debug code
 #        print commonPrefix
@@ -649,23 +649,23 @@ def SFVCreateMode(files):
         # Writing out header to checksum file
         checksumFile = open(checksumFileOutput, 'w')
         checksumFile.writelines('; Generated by %s v%s on %s' %
-            (os.path.split(sys.argv[0])[1], version,
+            (os.path.split(sys.argv[0])[1], VERSION,
             datetime.now().isoformat() + '\n;\n'))
-    
+
         # Looping for all files to hash
         for fileToHash in files:
-    
+
             # Removing common root directory from file path (first item in the
             # list will be empty). Removing directory slash as needed
             relativePath = fileToHash.split(commonPrefix)[1]
             if relativePath[:1] == os.sep: relativePath = relativePath[1:]
-    
+
             # Obtaining file hash
-            fileHash = CRC32Checksum(fileToHash)
-    
+            fileHash = crc32_checksum(fileToHash)
+
             # Writing out file record
             checksumFile.write(relativePath + ' ' + fileHash + '\n')
-    
+
         # Notifying user that checksum file has been written successfully
         print('\nChecksum file \'' + checksumFileOutput + '\' has been written '
               'successfully')
@@ -681,13 +681,13 @@ def SFVCreateMode(files):
         if not checksumFile is None: checksumFile.close()
 
 
-def ED2kLinkMode(files):
-    
+def ed2k_link_mode(files):
+
     # Generating eD2k links for all passed files
     for fileToHash in files:
         try:
-            print(ED2kLink(fileToHash))
-            
+            print(ed2k_link(fileToHash))
+
         except IOError as e:
             sys.stderr.write('\nFailed to generate an eD2k link for the file '
                              '\'%s\':\n\n%s\n' % (fileToHash, e))
@@ -701,18 +701,18 @@ parser.add_option('-a', '--add-hash-mode', dest='addHashMode', help='mode to '
 'Defaults to \'none\', \'ask\' prompts the user after hashing and \'always\' '
 'causes the hash to automatically be added when missing',
 metavar='addHashMode', choices=('none', 'ask', 'always'), default='none')
-parser.add_option('-c', '--checksum-read-mode', dest='checksumReadMode',
+parser.add_option('-c', '--checksum-read-mode', dest='checksum_read_mode',
 help='mode to look for checksum files and then hash the files as \
 described', metavar='checksumMode', action='store_true', default=False)
-parser.add_option('-e', '--ed2k-link-mode', dest='ED2kLinkMode',
+parser.add_option('-e', '--ed2k-link-mode', dest='ed2k_link_mode',
 help='mode to hash given files and output the ed2k links',
 metavar='checksumMode', action='store_true', default=False)
-parser.add_option('-s', '--sfv-create-mode', dest='sfvCreateMode', help=' mode'
+parser.add_option('-s', '--sfv-create-mode', dest='sfv_create_mode', help=' mode'
 ' to create an sfv file based on hashing the files passed',
-metavar='sfvCreateMode', action='store_true', default=False)
-parser.add_option('-m', '--md5-create-mode', dest='md5CreateMode',
+metavar='sfv_create_mode', action='store_true', default=False)
+parser.add_option('-m', '--md5-create-mode', dest='md5_create_mode',
 help='mode to create an md5 file based on hashing the files passed',
-metavar='md5CreateMode', action='store_true', default=False)
+metavar='md5_create_mode', action='store_true', default=False)
 parser.add_option('-o', '--checksum-output', dest='checksumOutput',
 help='path to output checksum file to (only valid in checksum file creation '
 'modes). If omitted, the file is output to the hashed files\' common root '
@@ -722,22 +722,24 @@ help='path to output checksum file to (only valid in checksum file creation '
 # Validating options
 # Ensuring no other modes are enabled when add-hash-mode is
 if (options.addHashMode != 'none'
-    and (options.checksumReadMode
-    or options.md5CreateMode
-    or options.sfvCreateMode)):
+    and (options.checksum_read_mode
+    or options.md5_create_mode
+    or options.sfv_create_mode)):
     sys.stderr.write(parser.get_usage() + '\nadd-hash-mode can only be used \
 when no other modes are enabled\n')
     sys.exit(1)
 
 # Ensuring one mode is enabled at one time
-if (options.checksumReadMode + options.sfvCreateMode + options.md5CreateMode) > 1:
+if (options.checksum_read_mode + options.sfv_create_mode + 
+    options.md5_create_mode) > 1:
     sys.stderr.write(parser.get_usage() + '\nOnly one mode can be enabled at once\n')
     sys.exit(1)
 
 # cfv cannot cope even with opening rapidcrc mod files, let alone intelligently
 # dealing with Windows-based nested directory structures inside - dropping
 # Ensuring cfv is available if a relevant mode has been requested
-#if (options.checksumReadMode + options.sfvCreateMode + options.md5CreateMode) > 0:
+#if (options.checksum_read_mode + options.sfv_create_mode + 
+#options.md5_create_mode) > 0:
 #    try:
 #        # Quashing stdout and stderr (Python 3.3 allows you to do this
 #        # properly...)
@@ -751,22 +753,22 @@ if (options.checksumReadMode + options.sfvCreateMode + options.md5CreateMode) > 
 #        sys.exit(1)
 
 # Dealing with various modes to run
-if options.checksumReadMode:
-    ChecksumReadMode(args)
+if options.checksum_read_mode:
+    checksum_read_mode(args)
 
-elif options.md5CreateMode:
-    MD5CreateMode(args)
+elif options.md5_create_mode:
+    md5_create_mode(args)
 
-elif options.sfvCreateMode:
-    SFVCreateMode(args)
+elif options.sfv_create_mode:
+    sfv_create_mode(args)
 
-elif options.ED2kLinkMode:
-    ED2kLinkMode(args)
+elif options.ed2k_link_mode:
+    ed2k_link_mode(args)
 
 else:
 
     # Normal CRC32 hashing needed
-    CRC32HashMode(args)
+    crc32_hash_mode(args)
 
 
 # TODO: Proper information display during hashing
