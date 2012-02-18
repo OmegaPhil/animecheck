@@ -141,6 +141,123 @@ def MD5Checksum(filename):
     return md5Hash.hexdigest()
 
 
+def ED2kLink(filename):
+    """ Returns the ed2k hash of a given file. """
+
+    # Based on radicand's code:
+    # http://www.radicand.org/edonkey2000-hash-in-python/
+    # ed2k links article: http://en.wikipedia.org/wiki/Ed2k_URI_scheme
+
+    # Variable allocation
+    # done is global as the md4_hash function needs to be able to update it
+    global done
+    done = 0
+
+    # Obtaining file size
+    fileSize = os.path.getsize(filename)
+
+    try:
+
+        # Preparing md4 hash object. Obtaining a copy perhaps due to speed?
+        # hashlib does not include this algorithm, but the new method
+        # delegates to OpenSSL when the algorithm is not found
+        md4 = hashlib.new('md4').copy
+
+    except Exception as e:
+
+        # OpenSSL is probably not available?
+        sys.stderr.write('ed2k hash mode was requested, but an attempt to get '
+                         'at md4 hashing failed - is OpenSSL installed?'
+                         '\n\n%s\n' % (e))
+        sys.exit(1)
+
+    def gen(f):
+
+        # Generator to return data in 9500KB blocks - these are the individual
+        # blocks that are hashed to start with
+
+        # Ensuring a local variable is not created
+        global done
+
+        # Defining a smaller read size that is a factor of 9500KB (9728000B),
+        # so that we get much finger grained feedback on the read progress
+        smallBufSize = 972800
+
+        # Preparing currentBlockData
+        currentBlockData = ''
+
+        while True:
+            try:
+
+                # Looping until a clean 9500KB block has been read
+                for readCounter in range(10):
+
+                    # Reading data and breaking if nothing more has been read
+                    data = f.read(smallBufSize)
+                    if not data: break
+                    else: currentBlockData += data
+                    
+                    # Updating terminal
+                    done += len(data)
+
+                    # Print digit in 7 character field with right justification
+                    if fileSize > 0:
+                        sys.stdout.write("%7d" % (done * 100 / fileSize) + "%"
+                                         + p_reset)
+                    else:
+                        sys.stdout.write("%7d" % (100) + "%" + p_reset)
+
+                # Yielding or exiting based on whether the current block of data
+                # is empty. As this is a generator function and currentBlockData
+                # accrues data, unless it is cleared before yielding, its contents
+                # will persist  
+                if currentBlockData:
+                    dataToReturn = currentBlockData
+                    currentBlockData = '' 
+                    yield dataToReturn
+                else: return
+               
+            # Catching Cntrl+C and exiting
+            except KeyboardInterrupt:
+                sys.stdout.write(p_reset)
+                f.close()
+                sys.exit(1)
+ 
+    def md4_hash(data):
+        try:
+            
+            # Hashing passed block
+            m = md4()
+            m.update(data)
+    
+            # Returning hash
+            return m
+        
+        # Catching Cntrl+C and exiting
+        except KeyboardInterrupt:
+            sys.stdout.write(p_reset)
+            f.close()
+            sys.exit(1)
+
+    with open(filename, 'rb') as f:
+        
+        # Obtaining generator function
+        a = gen(f)
+        
+        # Building up a list of md4 hashes associated with 9500KB blocks
+        hashes = [md4_hash(data).digest() for data in a]
+        
+        # If only one chunk is present, the hash is already done, otherwise concatenate
+        # the hashes of all current blocks and hash this
+        if len(hashes) == 1: ed2kHash = hashes[0].encode("hex")
+        else: ed2kHash = md4_hash(reduce(lambda a,d: a + d, hashes, "")).hexdigest()
+
+        # Returning ed2k link
+        # E.g.: 'ed2k://|file|The_Two_Towers-The_Purist_Edit-Trailer.avi|14997504|965c013e991ee246d63d45ea71954c4d|/'
+        return ('ed2k://|file|%s|%d|%s|/' % 
+                (os.path.basename(filename).replace(' ', '_'), fileSize, ed2kHash))
+        
+
 def DisplayResults(fileToHash, obtainedHash, checksumFileHash=None):
 
     # Splitting based on whether a checksum file is being processed or not
@@ -561,6 +678,19 @@ def SFVCreateMode(files):
         if not checksumFile is None: checksumFile.close()
 
 
+def ED2kLinkMode(files):
+    
+    # Generating eD2k links for all passed files
+    for fileToHash in files:
+        try:
+            print(ED2kLink(fileToHash))
+            
+        except IOError as e:
+            sys.stderr.write('\nFailed to generate an eD2k link for the file '
+                             '\'%s\':\n\n%s\n' % (fileToHash, e))
+            continue
+
+
 # Configuring and parsing passed options
 parser = OptionParser()
 parser.add_option('-a', '--add-hash-mode', dest='addHashMode', help='mode to '
@@ -571,6 +701,9 @@ metavar='addHashMode', choices=('none', 'ask', 'always'), default='none')
 parser.add_option('-c', '--checksum-read-mode', dest='checksumReadMode',
 help='mode to look for checksum files and then hash the files as \
 described', metavar='checksumMode', action='store_true', default=False)
+parser.add_option('-e', '--ed2k-link-mode', dest='ED2kLinkMode',
+help='mode to hash given files and output the ed2k links',
+metavar='checksumMode', action='store_true', default=False)
 parser.add_option('-s', '--sfv-create-mode', dest='sfvCreateMode', help=' mode'
 ' to create an sfv file based on hashing the files passed',
 metavar='sfvCreateMode', action='store_true', default=False)
@@ -624,12 +757,15 @@ elif options.md5CreateMode:
 elif options.sfvCreateMode:
     SFVCreateMode(args)
 
+elif options.ED2kLinkMode:
+    ED2kLinkMode(args)
+
 else:
 
     # Normal CRC32 hashing needed
     CRC32HashMode(args)
 
 
-# TODO: Add ed2k hashing if possible?
 # TODO: Proper information display during hashing
 # TODO: Summary of successful and failed hashes including files not found when processing checksum files and general CRC32 hashing mode
+# TODO: Import future?
