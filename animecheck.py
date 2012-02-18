@@ -20,6 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # TODO: GPL3+? Original author hasn't responded to emails
 
+# Preparing for Python 3
+from __future__ import division
+from __future__ import print_function
+
 import codecs
 import hashlib
 import io
@@ -768,4 +772,3 @@ else:
 
 # TODO: Proper information display during hashing
 # TODO: Summary of successful and failed hashes including files not found when processing checksum files and general CRC32 hashing mode
-# TODO: Import future?
