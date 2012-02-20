@@ -67,10 +67,8 @@ def crc32_checksum(filename):
             # Print digit in 7 character field with right justification
             if size > 0:
                 sys.stdout.write("%7d" % (done * 100 / size) + "%" + P_RESET)
-                pass
             else:
                 sys.stdout.write("%7d" % (100) + "%" + P_RESET)
-                pass
 
             # Iteratively hashing the data
             if not data:
