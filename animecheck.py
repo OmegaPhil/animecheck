@@ -330,9 +330,10 @@ def normalise_and_validate_files(files, checksumType):
         # current directory - making sure this is the case
         for fileToHash in normalisedFiles:
             if not os.path.isfile(fileToHash):
-                sys.stderr.write('%s\n%s create mode was requested, but the \
-passed files to hash do not share a common root directory:\n\n%s\n' %
-                (parser.get_usage(), checksumType, normalisedFiles))
+                sys.stderr.write('%s\n%s create mode was requested, but the '
+                                 'passed files to hash do not share a common '
+                                 'root directory:\n\n%s\n' %
+                                 (parser.get_usage(), checksumType, normalisedFiles))
                 sys.exit(1)
 
         # It is - setting commonPrefix appropriately (curdir is just '.' -
@@ -347,10 +348,11 @@ passed files to hash do not share a common root directory:\n\n%s\n' %
 
     # Ensuring common directory root is valid
     if not os.path.isdir(commonPrefix):
-        sys.stderr.write('%s\n%s create mode was requested, but the \
-calculated common root directory (\'%s\') of the passed files to hash is not \
-valid:\n\n%s\n' % (parser.get_usage(), checksumType, commonPrefix,
-                   normalisedFiles))
+        sys.stderr.write('%s\n%s create mode was requested, but the '
+                         'calculated common root directory (\'%s\') of '
+                         'the passed files to hash is not valid:\n\n%s\n' % 
+                         (parser.get_usage(), checksumType, commonPrefix,
+                          normalisedFiles))
         sys.exit(1)
 
     # Making sure that commonPrefix doesnt have a trailing slash
