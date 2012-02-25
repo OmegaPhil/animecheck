@@ -46,6 +46,7 @@ VERSION = '0.3'
 
 
 def crc32_checksum(filename):
+    '''CRC32 hashes the passed file, displaying the hashing progress'''
 
     # Variable allocation
     crc = 0
@@ -98,6 +99,7 @@ def crc32_checksum(filename):
 
 
 def md5_checksum(filename):
+    '''MD5 hashes the passed file, displaying the hashing progress'''
 
     # Variable allocation
     done = 0
@@ -143,7 +145,7 @@ def md5_checksum(filename):
 
 
 def ed2k_link(filename):
-    """ Returns the ed2k hash of a given file. """
+    '''Returns the ed2k link of a given file'''
 
     # Based on radicand's code:
     # http://www.radicand.org/edonkey2000-hash-in-python/
@@ -260,6 +262,7 @@ def ed2k_link(filename):
      
 
 def display_results(fileToHash, obtainedHash, checksumFileHash=None):
+    '''Displays results of a hashing operation'''
 
     # Splitting based on whether a checksum file is being processed or not
     if checksumFileHash == None:
@@ -311,6 +314,7 @@ def display_results(fileToHash, obtainedHash, checksumFileHash=None):
 
 
 def normalise_and_validate_files(files, checksumType):
+    '''Validates then returns a list of given files, ensuring they have absolute paths''' 
 
     # Normalising the file paths to ensure all inputs are absolute paths
     normalisedFiles = []
@@ -363,6 +367,7 @@ def normalise_and_validate_files(files, checksumType):
 
 
 def open_file(fileToOpen):
+    '''Opens files regardless of encoding...'''
 
     # Custom function has been created as Python, even though it is 'unicode
     # capable', cannot cope with Just Reading a UTF-16 file (so far)
@@ -392,6 +397,7 @@ def crc32_hash_mode(files):
 
     # Looping for all passed files - these are left over in args after the
     # options have been processed
+    '''CRC32 hashes passed files and displays results'''
     for fileToHash in files:
         try:
 
@@ -439,6 +445,8 @@ def crc32_hash_mode(files):
 
 
 def check_sfv_file(checksumFile):
+    '''CRC32 hashes files described in the checksum file and displays results'''
+    
     try:
 
         # Opening file, resulting in usable text regardless of original
@@ -489,6 +497,8 @@ def check_sfv_file(checksumFile):
 
 
 def check_md5_file(checksumFile):
+    '''MD5 hashes files described in the checksum file and displays results'''
+    
     try:
 
         # Opening file, resulting in usable text regardless of original
@@ -539,6 +549,7 @@ def check_md5_file(checksumFile):
 
 
 def checksum_read_mode(files):
+    '''Processes any checksum files present in the passed files'''
 
     # Variable allocation
     fileProcessed = False
@@ -564,6 +575,7 @@ def checksum_read_mode(files):
 
 
 def md5_create_mode(files):
+    '''Creates an md5 checksum file based off passed files'''   
 
     try:
 
@@ -624,6 +636,7 @@ def md5_create_mode(files):
 
 
 def sfv_create_mode(files):
+    '''Creates an sfv checksum file based off passed files'''
 
     try:
 
@@ -682,6 +695,7 @@ def sfv_create_mode(files):
 
 
 def ed2k_link_mode(files):
+    '''Displays eD2k links of passed files'''
 
     # Generating eD2k links for all passed files
     for fileToHash in files:
