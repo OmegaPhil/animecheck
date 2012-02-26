@@ -37,10 +37,14 @@ from datetime import datetime, timedelta
 from optparse import OptionParser
 
 # Defining terminal escape codes
-H_NULL = "\x1b[00;00m"
-H_RED = "\x1b[31;01m"
-H_GREEN = "\x1b[32;01m"
-P_RESET = "\x08"  # Backspace...
+H_NULL = '\x1b[00;00m'
+H_RED = '\x1b[31;01m'
+H_GREEN = '\x1b[32;01m'
+#P_RESET = '\x08'  # Backspace...
+
+# Clear to end of line then carriage return. This is usable now that there are
+# only two terminal updates a second
+P_RESET = '\x1B[K\x0D'
 
 # Initialising variables
 addHashModeFiles = []
@@ -590,14 +594,12 @@ def currentHashingTask_update(hashedData=0, fileSize=0, hashedSoFar=0, fileHashe
             else:
                 averageSpeed = '0B/Sec'
 
-            # TODO: bug in this - changing width output causes 'Secc' - test clear to end of line
             # Updating terminal - print digit in 7 character field with right
             # justification
             if fileSize > 0:
-                textToPrint = '%7d%% %s' % (hashedSoFar * 100 / fileSize, averageSpeed)
+                sys.stdout.write('%7d%% %s%s' % (hashedSoFar * 100 / fileSize, averageSpeed, P_RESET))
             else:
-                textToPrint = '%7d%% %s' % (100, averageSpeed)
-            sys.stdout.write(textToPrint + len(textToPrint) * P_RESET)
+                sys.stdout.write('%7d%% %s%s' % (100, averageSpeed, P_RESET))
             sys.stdout.flush()
 
     elif fileHashed != False:
