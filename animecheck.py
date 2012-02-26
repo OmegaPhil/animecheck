@@ -1133,14 +1133,15 @@ help='path to output checksum file to (only valid in checksum file creation '
 if (options.addHashMode != 'none'
     and (options.checksum_read_mode
     or options.md5_create_mode
-    or options.sfv_create_mode)):
+    or options.sfv_create_mode
+    or options.ed2k_link_mode)):
     sys.stderr.write(parser.get_usage() + '\nadd-hash-mode can only be used \
 when no other modes are enabled\n')
     sys.exit(1)
 
 # Ensuring one mode is enabled at one time
-if (options.checksum_read_mode + options.sfv_create_mode + 
-    options.md5_create_mode) > 1:
+if (options.checksum_read_mode + options.sfv_create_mode +
+    options.md5_create_mode + options.ed2k_link_mode) > 1:
     sys.stderr.write(parser.get_usage() + '\nOnly one mode can be enabled at once\n')
     sys.exit(1)
 
