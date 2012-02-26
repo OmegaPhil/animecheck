@@ -33,7 +33,7 @@ import shutil
 import sys
 import time
 import zlib
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from optparse import OptionParser
 
 # Defining terminal escape codes
