@@ -1,2 +1,6 @@
 v0.3:
-Addition of comments, minor 'cleanup'.
+Ability to add CRC32 hashes to the filenames of files without them.
+checksum read mode (sfv and md5).
+md5 create mode.
+sfv create mode.
+eD2k link mode.

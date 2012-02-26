@@ -3,7 +3,7 @@
 '''
 Version 0.3 2012.02.01
 Copyright (c) 2009, Taoufik El Aoumari (v0.2)
-Copyright (c) 2012, OmegaPhil (v0.3-)
+Copyright (c) 2012, OmegaPhil (v0.3-) - OmegaPhil+animecheck@gmail.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,6 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Preparing for Python 3
 from __future__ import division, print_function
+
+GPL_NOTICE = '''
+Copyright (C) 2012 OmegaPhil
+License GPLv3: GNU GPL version 3 <http://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+'''
 
 import codecs
 import exceptions
@@ -1136,7 +1143,7 @@ def ed2k_link_mode(files):
 
 
 # Configuring and parsing passed options
-parser = OptionParser()
+parser = OptionParser(version=('%%prog %s%s' % (VERSION, GPL_NOTICE)))
 parser.add_option('-a', '--add-hash-mode', dest='addHashMode', help='mode to '
 'define when a CRC32 hash is added to a filename where none has been found. '
 'Defaults to \'none\', \'ask\' prompts the user after hashing and \'always\' '
@@ -1144,20 +1151,22 @@ parser.add_option('-a', '--add-hash-mode', dest='addHashMode', help='mode to '
 metavar='addHashMode', choices=('none', 'ask', 'always'), default='none')
 parser.add_option('-c', '--checksum-read-mode', dest='checksum_read_mode',
 help='mode to look for checksum files and then hash the files as \
-described', metavar='checksumMode', action='store_true', default=False)
-parser.add_option('-e', '--ed2k-link-mode', dest='ed2k_link_mode',
-help='mode to hash given files and output ed2k links',
+described within. All files passed are searched for recognised checksum files'
+' (others are ignored) and processed in order of discovery', 
 metavar='checksumMode', action='store_true', default=False)
-parser.add_option('-s', '--sfv-create-mode', dest='sfv_create_mode', help=' mode'
-' to create an sfv file based on hashing the files passed',
-metavar='sfv_create_mode', action='store_true', default=False)
+parser.add_option('-e', '--ed2k-link-mode', dest='ed2k_link_mode',
+help='mode to hash given files and output eD2k links',
+metavar='checksumMode', action='store_true', default=False)
 parser.add_option('-m', '--md5-create-mode', dest='md5_create_mode',
-help='mode to create an md5 file based on hashing the files passed',
+help='mode to create an md5 file from the files passed - see -o',
 metavar='md5_create_mode', action='store_true', default=False)
 parser.add_option('-o', '--checksum-output', dest='checksumOutput',
 help='path to output checksum file to (only valid in checksum file creation '
 'modes). If omitted, the file is output to the hashed files\' common root '
 'directory', metavar='checksumOutput', default=None)
+parser.add_option('-s', '--sfv-create-mode', dest='sfv_create_mode', help='mode'
+' to create an sfv file from the files passed - see -o',
+metavar='sfv_create_mode', action='store_true', default=False)
 (options, args) = parser.parse_args()
 
 # Validating options
@@ -1217,4 +1226,3 @@ else:
 # representing general progress + speed? Print permanently prints to the
 # screen, sys.stdout.write with backspaces is transient.
 # <speed MB/Sec> <files to go /MB/GB>
-# TODO: Review of user-facing documentation

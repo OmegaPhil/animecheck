@@ -7,11 +7,23 @@ This script is a free software replacement of RapidCRC unicode mod (allowing me 
 
 1. CRC32 hash files and compare their hashes with those embedded in their filenames.
 2. Where CRC32 hashes are absent in filenames, offer to add them.
-3. Generate ed2k hash URIs so that they can be c&p'd to AniDB.
+3. Generate eD2k hash URIs so that they can be c&p'd to AniDB.
 4. Process sfv and md5 checksum files with and without nested directories in a platform independent fashion, and cope with RapidCRC unicode mod files.
 5. Create sfv and md5 checksum files.
 
 As this script is young, testing is very much welcome, as are basic feature requests. I have escaped Windows a few years ago so won't be testing there, but I do welcome bug reports and I expect this script to run in a platform-independent fashion. There are no plans to wrap a GUI around this script (CLI is the universal GUI ;)), although if someone is up for it, I can make a mode to better communicate with a wrapper (I'm guessing this is needed).
+
+
+Requirements
+============
+
+Python v2.7.
+
+
+Documentation
+=============
+
+See animecheck.py --help. If this is not enough and enough people are interested, I will look into better documentation methods.
 
 
 Contact Details
