@@ -56,9 +56,7 @@ P_RESET = '\x1B[K\x0D'
 # Initialising variables
 addHashModeFiles = []
 VERSION = '0.3'
-
-# Informing compiler that currentHashingTask is a global variable
-global currentHashingTask
+currentHashingTask = {}
 
 
 def crc32_checksum(filename):
