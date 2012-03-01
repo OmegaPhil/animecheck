@@ -56,7 +56,6 @@ P_RESET = '\x1B[K\x0D'
 # Initialising variables
 addHashModeFiles = []
 VERSION = '0.3'
-currentHashingTask = {}
 
 
 def crc32_checksum(filename):
