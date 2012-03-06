@@ -156,7 +156,8 @@ def md5_checksum(filename):
 
 
 def ed2k_link(filename):
-    '''Generates an eD2k link of the passed file, displaying the hashing progress'''
+    '''Generates an eD2k link of the passed file, displaying the hashing
+    progress'''
 
     # Based on radicand's code:
     # http://www.radicand.org/edonkey2000-hash-in-python/
@@ -218,10 +219,10 @@ def ed2k_link(filename):
                                                        fileSize=fileSize,
                                                        hashedSoFar=done)
 
-                # Yielding or exiting based on whether the current block of data
-                # is empty. As this is a generator function and currentBlockData
-                # accrues data, unless the latter is cleared before yielding,
-                # its contents will persist
+                # Yielding or exiting based on whether the current block of
+                # data is empty. As this is a generator function and
+                # currentBlockData accrues data, unless the latter is cleared
+                #  before yielding, its contents will persist
                 if currentBlockData:
                     dataToReturn = currentBlockData
                     currentBlockData = ''
@@ -258,21 +259,24 @@ def ed2k_link(filename):
         # Building up a list of md4 hashes associated with 9500KB blocks
         hashes = [md4_hash(data).digest() for data in a]
 
-        # If only one chunk is present, the hash is already done, otherwise concatenate
-        # the hashes of all current blocks and hash this
+        # If only one chunk is present, the hash is already done, otherwise 
+        # concatenate the hashes of all current blocks and hash this
         if len(hashes) == 1: ed2kHash = hashes[0].encode('hex')
         else: ed2kHash = md4_hash(reduce(lambda a,d: a + d, hashes, '')).hexdigest()
 
         # Returning ed2k link
         # E.g.: 'ed2k://|file|The_Two_Towers-The_Purist_Edit-Trailer.avi|14997504|965c013e991ee246d63d45ea71954c4d|/'
         return ('ed2k://|file|%s|%d|%s|/' %
-                (os.path.basename(filename).replace(' ', '_'), fileSize, ed2kHash))
+                (os.path.basename(filename).replace(' ', '_'), fileSize,
+                 ed2kHash))
 
 
-def display_results(fileToHash, obtainedHash, checksumFileHash=None, checksumFileGeneration=False):
+def display_results(fileToHash, obtainedHash, checksumFileHash=None,
+                    checksumFileGeneration=False):
     '''Displays results of a hashing operation'''
 
-    # Splitting based on whether a checksum file is being checked/generated or not
+    # Splitting based on whether a checksum file is being checked/generated or
+    # not
     if not checksumFileHash and not checksumFileGeneration:
         try:
 
@@ -323,20 +327,21 @@ def display_results(fileToHash, obtainedHash, checksumFileHash=None, checksumFil
         else:
             h_in = H_RED
             currentHashingTask_file_corrupt(fileToHash)
-    
+
         # Printing results with coloured hash at the beginning and in the
         # file path
         print("%s%s%s   %s" % (h_in, obtainedHash, H_NULL, fileToHash))
-            
+
     elif checksumFileGeneration:
 
         # Hash is from hashing a file as part of checksum file generation
         # No colours are to be used here
         print("%s   %s" % (obtainedHash, fileToHash))
-        
+
 
 def normalise_and_validate_files(files, checksumType):
-    '''Validates then returns a list of given files, ensuring they have absolute paths'''
+    '''Validates then returns a list of given files, ensuring they have
+    absolute paths'''
 
     # Normalising the file paths to ensure all inputs are absolute paths
     normalisedFiles = []
@@ -359,7 +364,8 @@ def normalise_and_validate_files(files, checksumType):
                 sys.stderr.write('%s\n%s create mode was requested, but the '
                                  'passed files to hash do not share a common '
                                  'root directory:\n\n%s\n' %
-                                 (parser.get_usage(), checksumType, normalisedFiles))
+                                 (parser.get_usage(), checksumType,
+                                  normalisedFiles))
                 sys.exit(1)
 
         # It is - setting commonPrefix appropriately (curdir is just '.' -
@@ -376,7 +382,7 @@ def normalise_and_validate_files(files, checksumType):
     if not os.path.isdir(commonPrefix):
         sys.stderr.write('%s\n%s create mode was requested, but the '
                          'calculated common root directory (\'%s\') of '
-                         'the passed files to hash is not valid:\n\n%s\n' % 
+                         'the passed files to hash is not valid:\n\n%s\n' %
                          (parser.get_usage(), checksumType, commonPrefix,
                           normalisedFiles))
         sys.exit(1)
@@ -443,11 +449,11 @@ def humanise_bytes(byteCount, precision=2):
     # Bitshifting n digits to the left (more significant bits direction), every
     # 10 = multiplying by 2^10 = 1024
     abbrevs = (
-        (1<<50L, 'PB'),
-        (1<<40L, 'TB'),
-        (1<<30L, 'GB'),
-        (1<<20L, 'MB'),
-        (1<<10L, 'kB'),
+        (1 << 50L, 'PB'),
+        (1 << 40L, 'TB'),
+        (1 << 30L, 'GB'),
+        (1 << 20L, 'MB'),
+        (1 << 10L, 'kB'),
         (1, 'bytes')
     )
     if byteCount == 1:
@@ -456,14 +462,14 @@ def humanise_bytes(byteCount, precision=2):
         if byteCount >= factor:
             break
 
-    # Obtaining initial formatted byte count (decimal of user-defined 
+    # Obtaining initial formatted byte count (decimal of user-defined
     # precision from the given float). This keeps insignificant
     # trailing zeros which must be removed. g does this but takes in the data
     # as a double, and therefore formats it with exponentiation which is not
     # appropriate
     formattedByteCount = '%.*f' % (precision, byteCount / factor)
 
-    # Removing trailing zeros and decimal place then returning 
+    # Removing trailing zeros and decimal place then returning
     return formattedByteCount.rstrip('0').rstrip('.') + suffix
 
 
@@ -475,7 +481,7 @@ def get_date(ctime):
 
     # Generating date parts and ensuring they are correctly zero-padded as
     # appropriate
-    timeDay = (str(localTime.tm_mday) if len(str(localTime.tm_mday)) == 2 
+    timeDay = (str(localTime.tm_mday) if len(str(localTime.tm_mday)) == 2
                else '0' + str(localTime.tm_mday))
     timeMonth = (str(localTime.tm_mon) if len(str(localTime.tm_mon)) == 2
                  else '0' + str(localTime.tm_mon))
@@ -508,28 +514,28 @@ def currentHashingTask_initialise(files):
                           'filesHashed': 0,
                           'lastUpdatedSpeed': 0,
                           'lastUpdatedTime': 0,
-                          
+
                           # Records amount hashed on last terminal update
                           'lastUpdatedDataHashed': 0,
-                          
+
                           # Speeds are initialised as strings in case 0 is a
                           # valid recorded speed
-                          'speed1': '',  
+                          'speed1': '',
                           'speed2': '',
                           'speed3': '',
                           'speed4': '',
-                          
+
                           # Cached speed value to avoid constantly changing
                           # output
-                          'cachedAverageSpeed': '',  
-                          
+                          'cachedAverageSpeed': '',
+
                           # Time at which the value was cached
                           'cachedAverageSpeedTime': 0,
                           'corruptFileCount': 0,
                           'noHashFileCount': 0,
                           'errorFileNotFoundCount': 0,
                           'errorOtherCount': 0}
-                          
+
     # Looping for all passed files
     for fileToHash in files:
 
@@ -573,43 +579,43 @@ def currentHashingTask_update(hashedData=0, fileSize=0, hashedSoFar=0,
         currentHashingTask['dataToHash'] -= hashedData
 
         # Obtaining duration
-        lastUpdatedTime = (currentHashingTask['lastUpdatedTime'] 
+        lastUpdatedTime = (currentHashingTask['lastUpdatedTime']
                            if currentHashingTask['lastUpdatedTime']
                            else currentHashingTask['hashStartTime'])
         duration = time.time() - lastUpdatedTime
-        
+
         # Debug code
         #print('\n' + str(duration) + '\n')
-         
+
         # Checking if at least half a second has elapsed since the last
         # average calculation. Running stats off the raw reads seems to
         # result in largely overblown speeds?
         if duration >= 0.5:
 
             # It has - obtaining hashedData during the interval
-            hashedData = (currentHashingTask['dataHashed'] - 
-                          currentHashingTask['lastUpdatedDataHashed']) 
-            
+            hashedData = (currentHashingTask['dataHashed'] -
+                          currentHashingTask['lastUpdatedDataHashed'])
+
             # Updating recorded speeds
-            if (currentHashingTask['lastUpdatedSpeed'] == 0 or 
+            if (currentHashingTask['lastUpdatedSpeed'] == 0 or
             currentHashingTask['lastUpdatedSpeed'] == 4):
-                
+
                 # No speed yet recorded or the records have looped
                 currentHashingTask['speed1'] = hashedData / duration
                 currentHashingTask['lastUpdatedSpeed'] = 1
-            
+
             elif currentHashingTask['lastUpdatedSpeed'] == 1:
                 currentHashingTask['speed2'] = hashedData / duration
                 currentHashingTask['lastUpdatedSpeed'] = 2
-            
+
             elif currentHashingTask['lastUpdatedSpeed'] == 2:
                 currentHashingTask['speed3'] = hashedData / duration
                 currentHashingTask['lastUpdatedSpeed'] = 3
-                
+
             elif currentHashingTask['lastUpdatedSpeed'] == 3:
                 currentHashingTask['speed4'] = hashedData / duration
                 currentHashingTask['lastUpdatedSpeed'] = 4
-                
+
             # Updating lastUpdatedTime and lastUpdatedDataHashed
             currentHashingTask['lastUpdatedTime'] = time.time()
             currentHashingTask['lastUpdatedDataHashed'] = currentHashingTask['dataHashed']
@@ -641,16 +647,16 @@ def currentHashingTask_update(hashedData=0, fileSize=0, hashedSoFar=0,
             sys.stdout.flush()
 
     elif fileHashed != False:
-        
+
         # Updating file counts
         currentHashingTask['filesToHash'] -= 1
         currentHashingTask['filesHashed'] += 1
-        
+
         # Resetting lastUpdatedTime
         currentHashingTask['lastUpdatedTime'] = time.time()
-        
+
     else:
-        
+
         # Function has been called without valid parameters - raising error
         raise Exception('currentHashingTask_update was called with either no '
                         'parameters or default parameters')
@@ -667,7 +673,7 @@ def currentHashingTask_error(e):
 
         # File not found error
         currentHashingTask['errorFileNotFoundCount'] += 1
-    
+
     else:
 
         # Any other error - not aware of details yet
@@ -697,23 +703,23 @@ def currentHashingTask_file_no_hash(noHashFile):
 
 def currentHashingTask_summary():
     '''Generates a summary of the completed current hashing task'''
-    
+
     # Obtaining stats to display
     notFoundCount = currentHashingTask['errorFileNotFoundCount']
     otherErrorCount = currentHashingTask['errorOtherCount']
-    fileCount = (currentHashingTask['filesHashed'] + notFoundCount + 
+    fileCount = (currentHashingTask['filesHashed'] + notFoundCount +
                  otherErrorCount)
     filesDescription = 'files' if fileCount > 1 else 'file'
     corruptCount = currentHashingTask['corruptFileCount']
     noHashCount = currentHashingTask['noHashFileCount']
     successCount = (currentHashingTask['filesHashed'] - corruptCount -
-                    noHashCount) 
+                    noHashCount)
     started = currentHashingTask['hashStartTime']
     finished = time.time()
     elapsed = timedelta(seconds=(finished - started))
     dataHashed = humanise_bytes(currentHashingTask['dataHashed'])
-    averageSpeed = humanise_bytes(currentHashingTask['dataHashed'] / 
-                                  elapsed.total_seconds()) 
+    averageSpeed = humanise_bytes(currentHashingTask['dataHashed'] /
+                                  elapsed.total_seconds())
 
     # Displaying summary of hashing task
     print('\nHashing task complete: %d %s, %d not found, %d other error, %d'
@@ -731,12 +737,12 @@ def currentHashingTask_summary():
 
 def crc32_hash_mode(files):
     '''CRC32 hashes passed files and displays results'''
-    
+
     # Initialising hashing task (files are the leftover arguments from the
     # OptionParser processing)
     currentHashingTask_initialise(files)
-    
-    # Looping through files to process 
+
+    # Looping through files to process
     for fileToHash in files:
         try:
 
@@ -745,23 +751,23 @@ def crc32_hash_mode(files):
 
             # Updating hashing task
             currentHashingTask_update(fileHashed=True)
-            
+
             # Displaying results
             display_results(fileToHash, crc)
 
         except Exception as e:
-            
+
             # Informing user
             sys.stderr.write('\nFailed to hash the file \'%s\':\n\n%s\n' %
                              (fileToHash, e))
-            
+
             # Registering error and moving to next file
             currentHashingTask_error(e)
             continue
 
     # Displaying a summary of the hashing task's progress
     currentHashingTask_summary()
-    
+
     # If files without hashes exist and the add hash mode is 'ask', proceeding
     # only if the user wants to
     if (len(addHashModeFiles) > 0
@@ -795,12 +801,13 @@ def crc32_hash_mode(files):
 
 
 def check_sfv_file(checksumFile):
-    '''CRC32 hashes files described in the checksum file and displays results'''
+    '''CRC32 hashes files described in the checksum file and displays
+    results'''
 
     # Initialising variables
     # List used here as I want to preserve the file-based order
     files = []
-    
+
     try:
 
         # Opening file, resulting in usable text regardless of original
@@ -834,8 +841,8 @@ def check_sfv_file(checksumFile):
 
         # Lines processed - initialising hashing task
         currentHashingTask_initialise([fileToHash[0] for fileToHash in files])
-        
-        # Looping through files to process 
+
+        # Looping through files to process
         for fileToHash, checksumFileCRC in files:
             try:
 
@@ -906,8 +913,8 @@ def check_md5_file(checksumFile):
 
         # Lines processed - initialising hashing task
         currentHashingTask_initialise([fileToHash[0] for fileToHash in files])
-        
-        # Looping through files to process 
+
+        # Looping through files to process
         for fileToHash, checksumFileMD5 in files:
             try:
 
@@ -940,7 +947,7 @@ def check_md5_file(checksumFile):
 
 def checksum_read_mode(files):
     '''Processes any checksum files present in the passed files'''
-    
+
     # Initialising variables
     fileProcessed = False
 
@@ -1008,12 +1015,13 @@ def md5_create_mode(files):
             if relativePath[:1] == os.sep: relativePath = relativePath[1:]
 
             try:
-                
+
                 # Obtaining file hash
                 fileHash = md5_checksum(fileToHash)
 
                 # Giving user feedback
-                display_results(fileToHash, fileHash, checksumFileGeneration=True)
+                display_results(fileToHash, fileHash,
+                                checksumFileGeneration=True)
 
             except Exception as e:
 
@@ -1093,7 +1101,8 @@ def sfv_create_mode(files):
                 fileHash = crc32_checksum(fileToHash)
 
                 # Giving user feedback
-                display_results(fileToHash, fileHash, checksumFileGeneration=True)
+                display_results(fileToHash, fileHash,
+                                checksumFileGeneration=True)
 
             except Exception as e:
 
@@ -1109,8 +1118,8 @@ def sfv_create_mode(files):
             checksumFile.write(relativePath + ' ' + fileHash + '\n')
 
         # Notifying user that checksum file has been written successfully
-        print('\nChecksum file \'' + checksumFileOutput + '\' has been written '
-              'successfully')
+        print('\nChecksum file \'' + checksumFileOutput + '\' has been written'
+              ' successfully')
 
     except Exception as e:
         sys.stderr.write('Failed to write to the checksum file \'%s\':\n\n%s\n'
@@ -1135,11 +1144,11 @@ def ed2k_link_mode(files):
             print(ed2k_link(fileToHash))
 
         except Exception as e:
-            
+
             # Informing user
             sys.stderr.write('\nFailed to generate an eD2k link for the file '
                              '\'%s\':\n\n%s\n' % (fileToHash, e))
-            
+
             # Registering error and moving to next file
             currentHashingTask_error(e)
             continue
@@ -1155,7 +1164,7 @@ metavar='addHashMode', choices=('none', 'ask', 'always'), default='none')
 parser.add_option('-c', '--checksum-read-mode', dest='checksum_read_mode',
 help='mode to look for checksum files and then hash the files as \
 described within. All files passed are searched for recognised checksum files'
-' (others are ignored) and processed in order of discovery', 
+' (others are ignored) and processed in order of discovery',
 metavar='checksumMode', action='store_true', default=False)
 parser.add_option('-e', '--ed2k-link-mode', dest='ed2k_link_mode',
 help='mode to hash given files and output eD2k links',
@@ -1167,8 +1176,8 @@ parser.add_option('-o', '--checksum-output', dest='checksumOutput',
 help='path to output checksum file to (only valid in checksum file creation '
 'modes). If omitted, the file is output to the hashed files\' common root '
 'directory', metavar='checksumOutput', default=None)
-parser.add_option('-s', '--sfv-create-mode', dest='sfv_create_mode', help='mode'
-' to create an sfv file from the files passed - see -o',
+parser.add_option('-s', '--sfv-create-mode', dest='sfv_create_mode',
+help='mode to create an sfv file from the files passed - see -o',
 metavar='sfv_create_mode', action='store_true', default=False)
 (options, args) = parser.parse_args()
 
@@ -1186,13 +1195,14 @@ when no other modes are enabled\n')
 # Ensuring one mode is enabled at one time
 if (options.checksum_read_mode + options.sfv_create_mode +
     options.md5_create_mode + options.ed2k_link_mode) > 1:
-    sys.stderr.write(parser.get_usage() + '\nOnly one mode can be enabled at once\n')
+    sys.stderr.write(parser.get_usage() + '\nOnly one mode can be enabled at '
+                     'once\n')
     sys.exit(1)
 
 # cfv cannot cope even with opening rapidcrc mod files, let alone intelligently
 # dealing with Windows-based nested directory structures inside - dropping
 # Ensuring cfv is available if a relevant mode has been requested
-#if (options.checksum_read_mode + options.sfv_create_mode + 
+#if (options.checksum_read_mode + options.sfv_create_mode +
 #options.md5_create_mode) > 0:
 #    try:
 #        # Quashing stdout and stderr (Python 3.3 allows you to do this
@@ -1201,9 +1211,9 @@ if (options.checksum_read_mode + options.sfv_create_mode +
 #                        stderr=subprocess.STDOUT)
 #
 #    except (Exception) as e:
-#        sys.stderr.write('%s\nA cfv mode was requested, however the following \
-#error occurred when testing to see if cfv is installed:\n\n%s\n\n' % \
-#        (parser.get_usage(), e))
+#        sys.stderr.write('%s\nA cfv mode was requested, however the following'
+#                        ' error occurred when testing to see if cfv is '
+#                        'installed:\n\n%s\n\n' % (parser.get_usage(), e))
 #        sys.exit(1)
 
 # Dealing with various modes to run
