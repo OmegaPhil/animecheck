@@ -828,6 +828,31 @@ def crc32_hash_mode(files):
             continue
 
 
+def md5_hash_mode(files):
+    '''Displays md5 hashes of passed files'''
+
+    # Converting potential passed directories into their nested files
+    files = recursive_file_search(files)
+
+    # Initialising hashing task
+    currentHashingTask_initialise(files)
+
+    # Generating md5 hashes for all passed files
+    for fileToHash in files:
+        try:
+            print(fileToHash, md5_checksum(fileToHash))
+
+        except Exception as e:
+
+            # Informing user
+            sys.stderr.write('\nFailed to generate an md5 hash for the file '
+                             '\'%s\':\n\n%s\n' % (fileToHash, e))
+
+            # Registering error and moving to next file
+            currentHashingTask_error(e)
+            continue
+        
+        
 def check_sfv_file(checksumFile):
     '''CRC32 hashes files described in the checksum file and displays
     results'''
@@ -1209,6 +1234,9 @@ metavar='checksumMode', action='store_true', default=False)
 parser.add_option('-m', '--md5-create-mode', dest='md5_create_mode',
 help='mode to create an md5 file from the files passed - see -o',
 metavar='md5_create_mode', action='store_true', default=False)
+parser.add_option('-M', '--md5-hash-mode', dest='md5_hash_mode',
+help='mode to hash given files and output md5 hashes',
+metavar='md5_hash_mode', action='store_true', default=False)
 parser.add_option('-o', '--checksum-output', dest='checksumOutput',
 help='path to output checksum file to (only valid in checksum file creation '
 'modes). If omitted, the file is output to the hashed files\' common root '
@@ -1223,6 +1251,7 @@ metavar='sfv_create_mode', action='store_true', default=False)
 if (options.addHashMode != 'none'
     and (options.checksum_read_mode
     or options.md5_create_mode
+    or options.md5_hash_mode
     or options.sfv_create_mode
     or options.ed2k_link_mode)):
     sys.stderr.write(parser.get_usage() + '\nadd-hash-mode can only be used \
@@ -1231,7 +1260,8 @@ when no other modes are enabled\n')
 
 # Ensuring one mode is enabled at one time
 if (options.checksum_read_mode + options.sfv_create_mode +
-    options.md5_create_mode + options.ed2k_link_mode) > 1:
+    options.md5_create_mode + options.md5_hash_mode +
+    options.ed2k_link_mode) > 1:
     sys.stderr.write(parser.get_usage() + '\nOnly one mode can be enabled at '
                      'once\n')
     sys.exit(1)
@@ -1259,6 +1289,9 @@ if options.checksum_read_mode:
 
 elif options.md5_create_mode:
     md5_create_mode(args)
+
+elif options.md5_hash_mode:
+    md5_hash_mode(args)
 
 elif options.sfv_create_mode:
     sfv_create_mode(args)
