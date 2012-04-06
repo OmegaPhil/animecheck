@@ -55,7 +55,7 @@ P_RESET = '\x1B[K\x0D'
 
 # Initialising variables
 addHashModeFiles = []
-VERSION = '0.3'
+VERSION = '0.4'
 
 
 def crc32_checksum(filename):
@@ -392,6 +392,31 @@ def normalise_and_validate_files(files, checksumType):
 
     # Returning results
     return normalisedFiles, commonPrefix
+
+
+def recursive_file_search(pathsToSearch):
+    '''Recurses through all directories and files given to generate a complete
+    list of files'''
+
+    # Initialising variables
+    foundFiles = []
+
+    # Looping through all passed files and directories
+    for path in pathsToSearch:
+        if os.path.isdir(path):
+
+            # Recursively walking through directories discovered
+            for directory_path, directories, directory_files in os.walk(path):
+
+                    # Adding all discovered files to the main list
+                    for directory_file in directory_files:
+                        foundFiles.append(os.path.join(directory_path,
+                                                       directory_file))
+        elif os.path.isfile(path):
+            foundFiles.append(path)
+
+    # Returning discovered files
+    return foundFiles
 
 
 def open_file(fileToOpen):
@@ -738,6 +763,9 @@ def currentHashingTask_summary():
 def crc32_hash_mode(files):
     '''CRC32 hashes passed files and displays results'''
 
+    # Converting potential passed directories into their nested files
+    files = recursive_file_search(files)
+
     # Initialising hashing task (files are the leftover arguments from the
     # OptionParser processing)
     currentHashingTask_initialise(files)
@@ -979,6 +1007,9 @@ def md5_create_mode(files):
 
     try:
 
+        # Converting potential passed directories into their nested files
+        files = recursive_file_search(files)
+
         # Normalising and validating passed files
         files, commonPrefix = normalise_and_validate_files(files, 'md5')
 
@@ -1059,6 +1090,9 @@ def sfv_create_mode(files):
 
     try:
 
+        # Converting potential passed directories into their nested files
+        files = recursive_file_search(files)
+
         # Normalising and validating passed files
         files, commonPrefix = normalise_and_validate_files(files, 'sfv')
 
@@ -1134,6 +1168,9 @@ def sfv_create_mode(files):
 
 def ed2k_link_mode(files):
     '''Displays eD2k links of passed files'''
+
+    # Converting potential passed directories into their nested files
+    files = recursive_file_search(files)
 
     # Initialising hashing task
     currentHashingTask_initialise(files)
