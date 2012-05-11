@@ -1299,6 +1299,9 @@ elif options.sfv_create_mode:
 elif options.ed2k_link_mode:
     ed2k_link_mode(args)
 
+elif not args:
+    parser.print_usage()
+
 else:
 
     # Normal CRC32 hashing needed
