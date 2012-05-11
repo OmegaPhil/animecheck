@@ -55,7 +55,7 @@ P_RESET = '\x1B[K\x0D'
 
 # Initialising variables
 addHashModeFiles = []
-VERSION = '0.4'
+VERSION = '0.4.1'
 
 
 def crc32_checksum(filename):
@@ -474,11 +474,11 @@ def humanise_bytes(byteCount, precision=2):
     # Bitshifting n digits to the left (more significant bits direction), every
     # 10 = multiplying by 2^10 = 1024
     abbrevs = (
-        (1 << 50L, 'PB'),
-        (1 << 40L, 'TB'),
-        (1 << 30L, 'GB'),
-        (1 << 20L, 'MB'),
-        (1 << 10L, 'kB'),
+        (1 << 50, 'PB'),
+        (1 << 40, 'TB'),
+        (1 << 30, 'GB'),
+        (1 << 20, 'MB'),
+        (1 << 10, 'kB'),
         (1, 'bytes')
     )
     if byteCount == 1:
