@@ -43,6 +43,10 @@ import zlib
 from datetime import datetime, timedelta
 from optparse import OptionParser
 
+# Fix Python 2.x input
+try: input = raw_input
+except NameError: pass
+
 # Defining terminal escape codes
 if os.name != 'nt':
     H_NULL = '\x1b[00;00m'
@@ -812,8 +816,8 @@ def crc32_hash_mode(files):
     # only if the user wants to
     if (len(addHashModeFiles) > 0
         and options.addHashMode == 'ask'
-        and raw_input('\nDo you want to add CRC32 hashes to the filenames of'
-        ' files without them (y/n)?').lower() != 'y'):
+        and input('Add CRC32 hashes to the filenames of files without'
+        ' them (y/n) [y]? ').lower() == 'n'):
         print('Hashes will not be added to files without them')
         sys.exit()
 
