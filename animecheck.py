@@ -454,11 +454,12 @@ def open_file(fileToOpen):
 
     # Detecting utf16 encoding and decoding to sane data. Appears
     # to also thankfully kill off the BOM. The following StringIO wants
-    # unicode so everything else is encoded accordingly
+    # unicode so everything else is encoded accordingly (note that with
+    # unicode_literals this is now unicode by default as well)
     if fileData.startswith(codecs.BOM_UTF16):
         fileData = fileData.decode('utf16')
     else:
-        fileData = unicode(fileData)
+        fileData = fileData.decode()
 
     # You apparently cant just split the resulting string into newlines and
     # then iterate over them, so returning a file-like object
