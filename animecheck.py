@@ -72,6 +72,7 @@ P_RESET = '\x1B[K\x0D'
 # Initialising variables
 addHashModeFiles = []
 VERSION = '0.4.1'
+addHashFormat = '{name} [{hash}]'
 
 
 def crc32_checksum(filename):
@@ -838,8 +839,8 @@ def crc32_hash_mode(files):
             # Renaming file with the hash (note that the hash does not end up
             # before the first fullstop in a filename - however my usage will
             # not include files with more than one fullstop
-            filePath = (os.path.join(filePath, fileName + ' [' + hashedFile[1]
-                                     + ']' + fileExtension))
+            filePath = (os.path.join(filePath, addHashFormat.format(
+                        name=fileName,hash=hashedFile[1])+fileExtension))
             shutil.move(hashedFile[0], filePath)
 
         except Exception as e:
