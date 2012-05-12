@@ -44,9 +44,21 @@ from datetime import datetime, timedelta
 from optparse import OptionParser
 
 # Defining terminal escape codes
-H_NULL = '\x1b[00;00m'
-H_RED = '\x1b[31;01m'
-H_GREEN = '\x1b[32;01m'
+if os.name != 'nt':
+    H_NULL = '\x1b[00;00m'
+    H_RED = '\x1b[31;01m'
+    H_GREEN = '\x1b[32;01m'
+else:
+    try:
+        from colorama import init, Fore, Style
+
+        init()
+
+        H_NULL = Fore.RESET+Style.NORMAL
+        H_RED = Fore.RED+Style.BRIGHT
+        H_GREEN = Fore.GREEN+Style.BRIGHT
+    except ImportError:
+        H_NULL = H_RED = H_GREEN = ''
 #P_RESET = '\x08'  # Backspace...
 
 # Clear to end of line then carriage return. This is usable now that there are

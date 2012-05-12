@@ -18,7 +18,8 @@ As this script is young, testing is very much welcome, as are basic feature requ
 Requirements
 ============
 
-Python v2.7.
+Python v2.7 (Compatible with Python 3.2)
+Colorama module for color support on Windows (optional) (http://pypi.python.org/pypi/colorama)
 
 
 Documentation
