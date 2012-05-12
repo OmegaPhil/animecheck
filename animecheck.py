@@ -277,7 +277,7 @@ def ed2k_link(filename):
         # Building up a list of md4 hashes associated with 9500KB blocks
         hashes = [md4_hash(data).digest() for data in a]
 
-        # If only one chunk is present, the hash is already done, otherwise 
+        # If only one chunk is present, the hash is already done, otherwise
         # concatenate the hashes of all current blocks and hash this
         if len(hashes) == 1: ed2kHash = hashes[0].encode('hex')
         else: ed2kHash = md4_hash(b''.join(hashes)).hexdigest()
@@ -873,8 +873,8 @@ def md5_hash_mode(files):
             # Registering error and moving to next file
             currentHashingTask_error(e)
             continue
-        
-        
+
+
 def check_sfv_file(checksumFile):
     '''CRC32 hashes files described in the checksum file and displays
     results'''
