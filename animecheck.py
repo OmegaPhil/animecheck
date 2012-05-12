@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # TODO: GPL3+? Original author hasn't responded to emails
 
 # Preparing for Python 3
-from __future__ import division, print_function
+from __future__ import division, print_function, unicode_literals
 
 GPL_NOTICE = '''
 Copyright (C) 2012 OmegaPhil
@@ -211,7 +211,7 @@ def ed2k_link(filename):
         # Initialising variables
         # Ensuring a local variable is not created
         global done
-        currentBlockData = ''
+        currentBlockData = b''
 
         # Defining a smaller read size that is a factor of 9500KB (9728000B),
         # so that we get much finger grained feedback on the read progress
@@ -242,7 +242,7 @@ def ed2k_link(filename):
                 #  before yielding, its contents will persist
                 if currentBlockData:
                     dataToReturn = currentBlockData
-                    currentBlockData = ''
+                    currentBlockData = b''
                     yield dataToReturn
                 else: return
 
@@ -279,7 +279,7 @@ def ed2k_link(filename):
         # If only one chunk is present, the hash is already done, otherwise 
         # concatenate the hashes of all current blocks and hash this
         if len(hashes) == 1: ed2kHash = hashes[0].encode('hex')
-        else: ed2kHash = md4_hash(reduce(lambda a,d: a + d, hashes, '')).hexdigest()
+        else: ed2kHash = md4_hash(b''.join(hashes)).hexdigest()
 
         # Returning ed2k link
         # E.g.: 'ed2k://|file|The_Two_Towers-The_Purist_Edit-Trailer.avi|14997504|965c013e991ee246d63d45ea71954c4d|/'
