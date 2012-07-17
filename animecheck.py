@@ -823,8 +823,8 @@ def crc32_hash_mode(files):
     # only if the user wants to
     if (len(addHashModeFiles) > 0
         and options.addHashMode == 'ask'
-        and input('Add CRC32 hashes to the filenames of files without'
-        ' them (y/n) [y]? ').lower() == 'n'):
+        and input('Do you want to add CRC32 hashes to the filenames of files'
+        ' without them (Y/n)? ').lower() == 'n'):
         print('Hashes will not be added to files without them')
         sys.exit()
 
