@@ -43,37 +43,42 @@ import zlib
 from datetime import datetime, timedelta
 from optparse import OptionParser
 
-# Fix Python 2.x input
-try: input = raw_input
-except NameError: pass
+# Initialising variables
+addHashModeFiles = []
+VERSION = '0.4.1'
+addHashFormat = '{name} [{hash}]'
 
-# Defining terminal escape codes
+# Defining terminal escape codes based on OS
 if os.name != 'nt':
     H_NULL = '\x1b[00;00m'
     H_RED = '\x1b[31;01m'
     H_GREEN = '\x1b[32;01m'
     #P_RESET = '\x08'  # Backspace...
 
-    # Clear to end of line then carriage return. This is usable now that there are
-    # only two terminal updates a second
+    # Clear to end of line then carriage return. This is usable now that there
+    # are only two terminal updates a second
     P_RESET = '\x1B[K\x0D'
+
 else:
     try:
         from colorama import init, Fore, Style
 
         init()
 
-        H_NULL = Fore.RESET+Style.NORMAL
-        H_RED = Fore.RED+Style.BRIGHT
-        H_GREEN = Fore.GREEN+Style.BRIGHT
+        H_NULL = Fore.RESET + Style.NORMAL
+        H_RED = Fore.RED + Style.BRIGHT
+        H_GREEN = Fore.GREEN + Style.BRIGHT
+
     except ImportError:
         H_NULL = H_RED = H_GREEN = ''
+
     P_RESET = '\x0D'
 
-# Initialising variables
-addHashModeFiles = []
-VERSION = '0.4.1'
-addHashFormat = '{name} [{hash}]'
+# Fix Python 2.x input
+try:
+    input = raw_input
+except NameError:
+    pass
 
 
 def crc32_checksum(filename):
@@ -844,7 +849,8 @@ def crc32_hash_mode(files):
             # before the first fullstop in a filename - however my usage will
             # not include files with more than one fullstop
             filePath = (os.path.join(filePath, addHashFormat.format(
-                        name=fileName,hash=hashedFile[1])+fileExtension))
+                        name=fileName,
+                        hash=hashedFile[1]) + fileExtension))
             shutil.move(hashedFile[0], filePath)
 
         except Exception as e:
@@ -1325,6 +1331,9 @@ elif options.ed2k_link_mode:
     ed2k_link_mode(args)
 
 elif not args:
+
+    # Optparse does not properly deal with no arguments, so this needs to be
+    # manually handled
     parser.print_usage()
 
 else:
