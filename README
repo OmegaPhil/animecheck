@@ -18,8 +18,13 @@ As this script is young, testing is very much welcome, as are basic feature requ
 Requirements
 ============
 
-Python v2.7 (Compatible with Python 3.2)
-Colorama module for color support on Windows (optional) (http://pypi.python.org/pypi/colorama)
+Python v2.7 (compatible with Python v3.2)
+
+
+Optional
+--------
+
+Colorama module for color support on Windows, courtesy of wiiaboo - http://pypi.python.org/pypi/colorama
 
 
 Documentation
@@ -32,3 +37,9 @@ Contact Details
 ===============
 
 OmegaPhil: OmegaPhil+animecheck@gmail.com
+
+
+Credits
+=======
+
+wiiaboo (Ricardo Constantino): Code fixes to support Windows command prompt, fixes to support Python v3 whilst keeping v2.x compatibility (v0.5).

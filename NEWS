@@ -1,8 +1,11 @@
-v0.4:
+v0.5 (17.07.12):
+wiiaboo fixes to properly support Windows Command Prompt, and fixes for running the script under Python v3 - thanks :) (https://github.com/OmegaPhil/animecheck/pull/3)
+
+v0.4 (06.04.12):
 Fix to allow directories to be passed in (https://github.com/OmegaPhil/animecheck/issues/2)
 Add md5_hash_mode to MD5 hash passed files (https://github.com/OmegaPhil/animecheck/issues/1)
 
-v0.3:
+v0.3 (26.02.12):
 Ability to add CRC32 hashes to the filenames of files without them.
 checksum read mode (sfv and md5).
 md5 create mode.

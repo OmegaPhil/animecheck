@@ -4,6 +4,7 @@
 Version 0.3 2012.02.01
 Copyright (c) 2009, Taoufik El Aoumari (v0.2)
 Copyright (c) 2012, OmegaPhil (v0.3-) - OmegaPhil+animecheck@gmail.com
+Copyright (c) 2012, Ricardo Constantino (v0.5) - wiiaboo@gmail.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -45,7 +46,7 @@ from optparse import OptionParser
 
 # Initialising variables
 addHashModeFiles = []
-VERSION = '0.4.1'
+VERSION = '0.5'
 addHashFormat = '{name} [{hash}]'
 
 # Defining terminal escape codes based on OS
