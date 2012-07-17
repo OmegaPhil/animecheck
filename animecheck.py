@@ -434,7 +434,9 @@ def recursive_file_search(pathsToSearch):
             foundFiles.append(path)
 
         else:
-            sys.stderr.write('Path %s is not valid' % path)
+
+            # Alerting user to invalid path and exiting
+            sys.stderr.write('Path \'%s\' is invalid' % path)
             sys.exit(1)
 
     # Returning discovered files
