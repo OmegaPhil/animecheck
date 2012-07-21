@@ -1315,6 +1315,12 @@ if (options.checksum_read_mode + options.sfv_create_mode +
 #                        'installed:\n\n%s\n\n' % (parser.get_usage(), e))
 #        sys.exit(1)
 
+# 'Decoding' all parameters to unicode - data is expected as UTF-8 (of which
+# ASCII is a subset of). Without this, python treats the parameters as ASCII
+# strings and subsequently dies when it manipulates a string that contains a
+# byte value >126
+args = [arg.decode('utf-8') for arg in args]
+
 # Dealing with various modes to run
 if options.checksum_read_mode:
     checksum_read_mode(args)
