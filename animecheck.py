@@ -1341,7 +1341,7 @@ elif not args:
 
     # Optparse does not properly deal with no arguments, so this needs to be
     # manually handled
-    parser.print_usage()
+    parser.print_help()
 
 else:
 
