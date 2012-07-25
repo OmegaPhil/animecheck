@@ -32,7 +32,6 @@ There is NO WARRANTY, to the extent permitted by law.
 '''
 
 import codecs
-import exceptions
 import hashlib
 import io
 import os
@@ -725,7 +724,7 @@ def currentHashingTask_error(e):
     global currentHashingTask
 
     # Dealing with various errors
-    if isinstance(e, exceptions.IOError) and e.errno == 2:
+    if isinstance(e, IOError) and e.errno == 2:
 
         # File not found error
         currentHashingTask['errorFileNotFoundCount'] += 1
