@@ -1060,6 +1060,7 @@ def md5_create_mode(files):
 
     # Initialising variables
     checksumFile = None
+    errorOccurred = False
 
     try:
 
@@ -1106,6 +1107,9 @@ def md5_create_mode(files):
                 # Obtaining file hash
                 fileHash = md5_checksum(fileToHash)
 
+                # Updating hashing task
+                currentHashingTask_update(fileHashed=True)
+
                 # Giving user feedback
                 display_results(fileToHash, fileHash,
                                 checksumFileGeneration=True)
@@ -1116,16 +1120,31 @@ def md5_create_mode(files):
                 sys.stderr.write('Failed to hash \'%s\':\n\n%s\n' %
                                  (fileToHash, e))
 
+                # Recording error in checksum file so that the user is in no
+                # doubt that the resulting checksum file contains this issue
+                checksumFile.writelines(['; \'%s\' occurred whilst hashing the'
+                                         ' below file:\n' % e,
+                                         '00000000000000000000000000000000' +
+                                         ' *' + relativePath + '\n'])
+
                 # Registering error and moving to next file
                 currentHashingTask_error(e)
+                errorOccurred = True
                 continue
 
             # Writing out file record
             checksumFile.write(fileHash + ' *' + relativePath + '\n')
 
-        # Notifying user that checksum file has been written successfully
-        print('\nChecksum file \'' + checksumFileOutput + '\' has been written'
-              ' successfully')
+        # Reporting to the user on the success of writing the checksum file
+        if errorOccurred == False:
+            print('\nChecksum file \'' + checksumFileOutput + '\' has been '
+                  'written successfully')
+        else:
+            print('\nWarning! Checksum file \'' + checksumFileOutput + '\' has'
+                  ' not been written successfully! See above for errors')
+
+        # Displaying a summary of the hashing task's progress
+        currentHashingTask_summary()
 
     except Exception as e:
         sys.stderr.write('Failed to write to the checksum file \'%s\':\n\n%s\n'
@@ -1143,6 +1162,7 @@ def sfv_create_mode(files):
 
     # Initialising variables
     checksumFile = None
+    errorOccurred = False
 
     try:
 
@@ -1190,6 +1210,9 @@ def sfv_create_mode(files):
                 # Obtaining file hash
                 fileHash = crc32_checksum(fileToHash)
 
+                # Updating hashing task
+                currentHashingTask_update(fileHashed=True)
+
                 # Giving user feedback
                 display_results(fileToHash, fileHash,
                                 checksumFileGeneration=True)
@@ -1200,16 +1223,31 @@ def sfv_create_mode(files):
                 sys.stderr.write('Failed to hash \'%s\':\n\n%s\n' %
                                  (fileToHash, e))
 
+                # Recording error in checksum file so that the user is in no
+                # doubt that the resulting checksum file contains this issue
+                checksumFile.writelines(['; \'%s\' occurred whilst hashing the'
+                                         ' below file:\n' %
+                                         e, relativePath + ' 00000000\n'])
+
                 # Registering error and moving to next file
                 currentHashingTask_error(e)
+                errorOccurred = True
                 continue
 
             # Writing out file record
             checksumFile.write(relativePath + ' ' + fileHash + '\n')
 
-        # Notifying user that checksum file has been written successfully
-        print('\nChecksum file \'' + checksumFileOutput + '\' has been written'
-              ' successfully')
+        # Reporting to the user on the success of writing the checksum file
+        if errorOccurred == False:
+            print('\nChecksum file \'' + checksumFileOutput + '\' has been '
+                  'written successfully')
+        else:
+            print('\nWarning! Checksum file \'' + checksumFileOutput + '\' has'
+                  ' not been written successfully! See above for errors')
+
+        # Displaying a summary of the hashing task's progress
+        currentHashingTask_summary()
+
 
     except Exception as e:
         sys.stderr.write('Failed to write to the checksum file \'%s\':\n\n%s\n'
