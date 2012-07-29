@@ -1,3 +1,10 @@
+v0.6 (29.07.12):
+Fix to make errors during hashing in checksum file creation modes much more obvious and recorded (https://github.com/OmegaPhil/animecheck/issues/6)
+Hashing task stats now reported at the end of checksum file creation modes too
+Fix python treating file paths passed to the program as ASCII - prevented hashing of files with paths containing unicode characters outside of the ASCII subset (https://github.com/OmegaPhil/animecheck/issues/4)
+Output help when user passes no arguments
+Removed exceptions module import - doesn't exist in Python 3 (https://github.com/OmegaPhil/animecheck/issues/5)
+
 v0.5 (17.07.12):
 wiiaboo fixes to properly support Windows Command Prompt, and fixes for running the script under Python v3 - thanks :) (https://github.com/OmegaPhil/animecheck/pull/3)
 
