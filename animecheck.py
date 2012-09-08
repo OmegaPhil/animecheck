@@ -39,6 +39,7 @@ import re
 import shutil
 import sys
 import time
+import traceback
 import zlib
 from datetime import datetime, timedelta
 from optparse import OptionParser
@@ -816,8 +817,8 @@ def crc32_hash_mode(files):
         except Exception as e:
 
             # Informing user
-            sys.stderr.write('\nFailed to hash the file \'%s\':\n\n%s\n' %
-                             (fileToHash, e))
+            sys.stderr.write('\nFailed to hash the file \'%s\':\n\n%s\n\n%s\n'
+                             % (fileToHash, e, traceback.format_exc()))
 
             # Registering error and moving to next file
             currentHashingTask_error(e)
@@ -855,7 +856,8 @@ def crc32_hash_mode(files):
 
         except Exception as e:
             sys.stderr.write('Addition of CRC32 hash \'%s\' to the filename of'
-                             ' \'%s\' failed:\n\n%s\n' % (crc, file, e))
+                             ' \'%s\' failed:\n\n%s\n\n%s\n'
+                             % (crc, file, e, traceback.format_exc()))
             continue
 
 
@@ -877,7 +879,8 @@ def md5_hash_mode(files):
 
             # Informing user
             sys.stderr.write('\nFailed to generate an md5 hash for the file '
-                             '\'%s\':\n\n%s\n' % (fileToHash, e))
+                             '\'%s\':\n\n%s\n\n%s\n' %
+                             (fileToHash, e, traceback.format_exc()))
 
             # Registering error and moving to next file
             currentHashingTask_error(e)
@@ -942,8 +945,8 @@ def check_sfv_file(checksumFile):
             except Exception as e:
 
                 # Informing user
-                sys.stderr.write('Failed to hash \'%s\':\n\n%s\n' %
-                                 (fileToHash, e))
+                sys.stderr.write('Failed to hash \'%s\':\n\n%s\n\n%s\n' %
+                                 (fileToHash, e, traceback.format_exc()))
 
                 # Registering error and moving to next file
                 currentHashingTask_error(e)
@@ -954,7 +957,7 @@ def check_sfv_file(checksumFile):
 
     except Exception as e:
         sys.stderr.write('Failed to process the checksum file \'%s\':\n\n%s\n'
-                         % (checksumFile, e))
+                         '\n%s\n' % (checksumFile, e, traceback.format_exc()))
 
 
 def check_md5_file(checksumFile):
@@ -1014,8 +1017,8 @@ def check_md5_file(checksumFile):
             except Exception as e:
 
                 # Informing user
-                sys.stderr.write('Failed to hash \'%s\':\n\n%s\n' %
-                                 (fileToHash, e))
+                sys.stderr.write('Failed to hash \'%s\':\n\n%s\n\n%s\n' %
+                                 (fileToHash, e, traceback.format_exc()))
 
                 # Registering error and moving to next file
                 currentHashingTask_error(e)
@@ -1026,7 +1029,7 @@ def check_md5_file(checksumFile):
 
     except Exception as e:
         sys.stderr.write('Failed to process the checksum file \'%s\':\n\n%s\n'
-                         % (checksumFile, e))
+                         '\n%s\n' % (checksumFile, e, traceback.format_exc()))
 
 
 def checksum_read_mode(files):
@@ -1147,8 +1150,9 @@ def md5_create_mode(files):
         currentHashingTask_summary()
 
     except Exception as e:
-        sys.stderr.write('Failed to write to the checksum file \'%s\':\n\n%s\n'
-                         % (checksumFileOutput, e))
+        sys.stderr.write('Failed to write to the checksum file \'%s\':\n\n%s'
+                         '\n\n%s\n' % (checksumFileOutput, e,
+                                       traceback.format_exc()))
         sys.exit(1)
 
     finally:
@@ -1251,7 +1255,8 @@ def sfv_create_mode(files):
 
     except Exception as e:
         sys.stderr.write('Failed to write to the checksum file \'%s\':\n\n%s\n'
-                         % (checksumFileOutput, e))
+                         '\n%s\n'
+                         % (checksumFileOutput, e, traceback.format_exc()))
         sys.exit(1)
 
     finally:
@@ -1278,7 +1283,8 @@ def ed2k_link_mode(files):
 
             # Informing user
             sys.stderr.write('\nFailed to generate an eD2k link for the file '
-                             '\'%s\':\n\n%s\n' % (fileToHash, e))
+                             '\'%s\':\n\n%s\n\n%s\n'
+                             % (fileToHash, e, traceback.format_exc()))
 
             # Registering error and moving to next file
             currentHashingTask_error(e)
