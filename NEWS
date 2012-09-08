@@ -1,3 +1,7 @@
+v0.7 (08.09.12):
+Addition of tracebacks to unknown errors
+More unicode fail from python... fix to actually allow unicode filenames in checksum files (https://github.com/OmegaPhil/animecheck/issues/9)
+
 v0.6 (29.07.12):
 Fix to make errors during hashing in checksum file creation modes much more obvious and recorded (https://github.com/OmegaPhil/animecheck/issues/6)
 Hashing task stats now reported at the end of checksum file creation modes too
