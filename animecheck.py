@@ -457,17 +457,19 @@ def open_file(fileToOpen):
 
     # Reading whole file in at once - done like this to work around
     # encoding issues (binary to prevent any attempt at interpretation
-    # which would just lead to corruption)
-    fileData = open(fileToOpen, 'rb').read()
+    # which would just lead to corruption). Even io.open fails miserably
+    # on its own when it automatically tries to convert the leading BOM into
+    # UTF-8
+    fileData = io.open(fileToOpen, 'rb').read()
 
     # Detecting utf16 encoding and decoding to sane data. Appears
     # to also thankfully kill off the BOM. The following StringIO wants
-    # unicode so everything else is encoded accordingly (note that with
-    # unicode_literals this is now unicode by default as well)
+    # unicode so everything else is encoded accordingly (even with
+    # unicode_literals encoding is NOT UTF-8 by default)
     if fileData.startswith(codecs.BOM_UTF16):
         fileData = fileData.decode('utf16')
     else:
-        fileData = fileData.decode()
+        fileData = fileData.decode('utf8')
 
     # You apparently cant just split the resulting string into newlines and
     # then iterate over them, so returning a file-like object
