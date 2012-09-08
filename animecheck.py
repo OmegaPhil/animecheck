@@ -46,7 +46,7 @@ from optparse import OptionParser
 
 # Initialising variables
 addHashModeFiles = []
-VERSION = '0.6'
+VERSION = '0.7'
 addHashFormat = '{name} [{hash}]'
 
 # Defining terminal escape codes based on OS
