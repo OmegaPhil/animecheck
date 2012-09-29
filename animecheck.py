@@ -103,7 +103,8 @@ def crc32_checksum(filename):
             done += buff_size
 
             # Updating the hashing task status
-            if data: currentHashingTask_update(hashedData=len(data),
+            if data:
+                currentHashingTask_update(hashedData=len(data),
                                                fileSize=size,
                                                hashedSoFar=done)
 
@@ -156,7 +157,8 @@ def md5_checksum(filename):
             done += buff_size
 
             # Updating the hashing task status
-            if data: currentHashingTask_update(hashedData=len(data),
+            if data:
+                currentHashingTask_update(hashedData=len(data),
                                                fileSize=size,
                                                hashedSoFar=done)
 
@@ -228,18 +230,21 @@ def ed2k_link(filename):
             try:
 
                 # Looping until a clean 9500KB block has been read
-                for readCounter in range(10):
+                for _ in range(10):
 
                     # Reading data and breaking if nothing more has been read
                     data = f.read(smallBufSize)
-                    if not data: break
-                    else: currentBlockData += data
+                    if not data:
+                        break
+                    else:
+                        currentBlockData += data
 
                     # Updating done
                     done += len(data)
 
                     # Updating the hashing task status
-                    if data: currentHashingTask_update(hashedData=len(data),
+                    if data:
+                        currentHashingTask_update(hashedData=len(data),
                                                        fileSize=fileSize,
                                                        hashedSoFar=done)
 
@@ -251,7 +256,8 @@ def ed2k_link(filename):
                     dataToReturn = currentBlockData
                     currentBlockData = b''
                     yield dataToReturn
-                else: return
+                else:
+                    return
 
             # Catching Cntrl+C and exiting
             except KeyboardInterrupt:
@@ -285,8 +291,10 @@ def ed2k_link(filename):
 
         # If only one chunk is present, the hash is already done, otherwise
         # concatenate the hashes of all current blocks and hash this
-        if len(hashes) == 1: ed2kHash = hashes[0].encode('hex')
-        else: ed2kHash = md4_hash(b''.join(hashes)).hexdigest()
+        if len(hashes) == 1:
+            ed2kHash = hashes[0].encode('hex')
+        else:
+            ed2kHash = md4_hash(b''.join(hashes)).hexdigest()
 
         # Returning ed2k link
         # E.g.: 'ed2k://|file|The_Two_Towers-The_Purist_Edit-Trailer.avi|14997504|965c013e991ee246d63d45ea71954c4d|/'
@@ -430,7 +438,7 @@ def recursive_file_search(pathsToSearch):
         if os.path.isdir(path):
 
             # Recursively walking through directories discovered
-            for directory_path, directories, directory_files in os.walk(path):
+            for directory_path, _, directory_files in os.walk(path):
 
                     # Adding all discovered files to the main list
                     for directory_file in directory_files:
@@ -605,7 +613,8 @@ def currentHashingTask_initialise(files):
 
         # Skipping all errors (probably caused by the above getsize) - the
         # actual hashing code will raise the relevant errors
-        except: continue
+        except:
+            continue
 
     # Setting start time
     currentHashingTask['hashStartTime'] = time.time()
@@ -1160,7 +1169,8 @@ def md5_create_mode(files):
     finally:
 
         # Closing file
-        if checksumFile: checksumFile.close()
+        if checksumFile:
+            checksumFile.close()
 
 
 def sfv_create_mode(files):
@@ -1254,7 +1264,6 @@ def sfv_create_mode(files):
         # Displaying a summary of the hashing task's progress
         currentHashingTask_summary()
 
-
     except Exception as e:
         sys.stderr.write('Failed to write to the checksum file \'%s\':\n\n%s\n'
                          '\n%s\n'
@@ -1264,7 +1273,8 @@ def sfv_create_mode(files):
     finally:
 
         # Closing file
-        if checksumFile: checksumFile.close()
+        if checksumFile:
+            checksumFile.close()
 
 
 def ed2k_link_mode(files):
