@@ -48,6 +48,7 @@ from optparse import OptionParser
 addHashModeFiles = []
 VERSION = '0.7'
 addHashFormat = '{name} [{hash}]'
+done = 0
 
 # Defining terminal escape codes based on OS
 if os.name != 'nt':
@@ -62,7 +63,7 @@ if os.name != 'nt':
 
 else:
     try:
-        from colorama import init, Fore, Style
+        from colorama import init, Fore, Style  # pylint: disable=F0401
 
         init()
 
@@ -77,7 +78,7 @@ else:
 
 # Fix Python 2.x input
 try:
-    input = raw_input
+    input = raw_input  # pylint: disable=W0622
 except NameError:
     pass
 
@@ -87,7 +88,7 @@ def crc32_checksum(filename):
 
     # Initialising variables
     crc = 0
-    done = 0
+    done = 0  # pylint: disable=W0621
 
     # Opening file to hash, buffer is large presumably to ensure its read in
     # fast
@@ -139,7 +140,7 @@ def md5_checksum(filename):
     '''MD5 hashes the passed file, displaying the hashing progress'''
 
     # Initialising variables
-    done = 0
+    done = 0  # pylint: disable=W0621
 
     # Opening file to hash, buffer is large presumably to ensure its read in
     # fast
@@ -147,8 +148,9 @@ def md5_checksum(filename):
     buff_size = 65536
     size = os.path.getsize(filename)
 
-    # Preparing md5 hash object
-    md5Hash = hashlib.md5()
+    # Preparing md5 hash object (disabling pylint error as it can't detect
+    # the md5 function)
+    md5Hash = hashlib.md5()  # pylint: disable=E1101
     try:
         while True:
 
@@ -440,10 +442,10 @@ def recursive_file_search(pathsToSearch):
             # Recursively walking through directories discovered
             for directory_path, _, directory_files in os.walk(path):
 
-                    # Adding all discovered files to the main list
-                    for directory_file in directory_files:
-                        foundFiles.append(os.path.join(directory_path,
-                                                       directory_file))
+                # Adding all discovered files to the main list
+                for directory_file in directory_files:
+                    foundFiles.append(os.path.join(directory_path,
+                                                   directory_file))
         elif os.path.isfile(path):
             foundFiles.append(path)
 
