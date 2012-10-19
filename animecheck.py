@@ -317,7 +317,7 @@ def display_results(fileToHash, obtainedHash, checksumFileHash=None,
             # It isn't - called from crc32_hash_mode. Obtaining the hash from
             # the filename (penultimate fragment) - remember that re does not
             # support POSIX character classes
-            dest_sum = re.split('([a-f0-9]{8})', fileToHash,
+            dest_sum = re.split(r'([a-f0-9]{8})', fileToHash,
                                 flags=re.IGNORECASE)[-2]
 
             # Setting colours depending on good/bad hash and registering a
@@ -924,7 +924,7 @@ def check_sfv_file(checksumFile):
                 # Regex is used as basic splitting on space screws up when
                 # there are contiguous spaces. As a capturing group is at the
                 # start, '' is returned in 0
-                match = re.split("^(.*)[ ]+([a-f0-9]{8})$", line,
+                match = re.split(r'^(.*)\s+([a-f0-9]{8})$', line,
                                 flags=re.IGNORECASE)
                 path, checksumFileCRC = match[1], match[2]
 
@@ -993,10 +993,12 @@ def check_md5_file(checksumFile):
             if line[0] != ';':
 
                 # Extracting hash (last 'word' on line) and the file to hash.
-                # Regex is used as basic splitting on space screws up when
-                # there are contiguous spaces. As a capturing group is at the
-                # start, '' is returned in 0
-                match = re.split("^([a-f0-9]{32})[ ]+\*(.*)$", line,
+                # '*' preceeding the filename indicates the file was read in
+                # binary/text mode, and therefore isnt always present. Regex
+                # is used as basic splitting on space screws up when there are
+                # contiguous spaces. As a capturing group is at the start, ''
+                # is returned in 0
+                match = re.split(r'^([a-f0-9]{32})\s+\*?(.+)$', line,
                                 flags=re.IGNORECASE)
                 path, checksumFileMD5 = match[2], match[1]
 
