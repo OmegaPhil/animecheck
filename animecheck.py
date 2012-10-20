@@ -46,7 +46,7 @@ from optparse import OptionParser
 
 # Initialising variables
 addHashModeFiles = []
-VERSION = '0.7'
+VERSION = '0.8'
 addHashFormat = '{name} [{hash}]'
 done = 0
 currentHashingTask = {}
