@@ -49,6 +49,7 @@ addHashModeFiles = []
 VERSION = '0.7'
 addHashFormat = '{name} [{hash}]'
 done = 0
+currentHashingTask = {}
 
 # Defining terminal escape codes based on OS
 if os.name != 'nt':
@@ -191,9 +192,12 @@ def ed2k_link(filename):
     # http://www.radicand.org/edonkey2000-hash-in-python/
     # eD2k links article: http://en.wikipedia.org/wiki/Ed2k_URI_scheme
 
+    # pylint considers this function to have too many branches?
+    # pylint: disable=R0912
+
     # Initialising variables
     # done is global as the md4_hash function needs to be able to update it
-    global done
+    global done  # pylint: disable=W0603
     done = 0
 
     # Obtaining file size
@@ -206,7 +210,7 @@ def ed2k_link(filename):
         # delegates to OpenSSL when the algorithm is not found
         md4 = hashlib.new('md4').copy
 
-    except Exception as e:
+    except ValueError as e:
 
         # OpenSSL is probably not available?
         sys.stderr.write('eD2k link mode was requested, but an attempt to get '
@@ -215,13 +219,12 @@ def ed2k_link(filename):
         sys.exit(1)
 
     def gen(f):
-
-        # Generator to return data in 9500KB blocks - these are the individual
-        # blocks that are hashed to start with
+        '''Generator to return data in 9500KB blocks - these are the individual
+        blocks that are hashed to start with'''
 
         # Initialising variables
         # Ensuring a local variable is not created
-        global done
+        global done  # pylint: disable=W0603
         currentBlockData = b''
 
         # Defining a smaller read size that is a factor of 9500KB (9728000B),
@@ -253,7 +256,7 @@ def ed2k_link(filename):
                 # Yielding or exiting based on whether the current block of
                 # data is empty. As this is a generator function and
                 # currentBlockData accrues data, unless the latter is cleared
-                #  before yielding, its contents will persist
+                # before yielding, its contents will persist
                 if currentBlockData:
                     dataToReturn = currentBlockData
                     currentBlockData = b''
@@ -268,6 +271,8 @@ def ed2k_link(filename):
                 sys.exit(1)
 
     def md4_hash(data):
+        '''Returns md4 hash of passed data'''
+
         try:
 
             # Hashing passed block
@@ -422,7 +427,8 @@ def normalise_and_validate_files(files, checksumType):
         sys.exit(1)
 
     # Making sure that commonPrefix doesnt have a trailing slash
-    if commonPrefix[-1:] == os.sep: commonPrefix = commonPrefix[:-1]
+    if commonPrefix[-1:] == os.sep:
+        commonPrefix = commonPrefix[:-1]
 
     # Returning results
     return normalisedFiles, commonPrefix
@@ -535,10 +541,10 @@ def humanise_bytes(byteCount, precision=2):
     # trailing zeros which must be removed. g does this but takes in the data
     # as a double, and therefore formats it with exponentiation which is not
     # appropriate
-    formattedByteCount = '%.*f' % (precision, byteCount / factor)
+    formattedByteCount = '%.*f' % (precision, byteCount / factor)  # pylint: disable=W0631
 
     # Removing trailing zeros and decimal place then returning
-    return formattedByteCount.rstrip('0').rstrip('.') + suffix
+    return formattedByteCount.rstrip('0').rstrip('.') + suffix  # pylint: disable=W0631
 
 
 def get_date(ctime):
@@ -570,7 +576,7 @@ def currentHashingTask_initialise(files):
     '''Initialises current hashing task record'''
 
     # Persisting currentHashingTask changes
-    global currentHashingTask
+    global currentHashingTask  # pylint: disable=W0603
 
     # Defining here so it is in one place only
     currentHashingTask = {
@@ -615,7 +621,7 @@ def currentHashingTask_initialise(files):
 
         # Skipping all errors (probably caused by the above getsize) - the
         # actual hashing code will raise the relevant errors
-        except:
+        except:  # pylint: disable=W0702
             continue
 
     # Setting start time
@@ -827,7 +833,7 @@ def crc32_hash_mode(files):
             # Displaying results
             display_results(fileToHash, crc)
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=W0703
 
             # Informing user
             sys.stderr.write('\nFailed to hash the file \'%s\':\n\n%s\n\n%s\n'
@@ -867,7 +873,7 @@ def crc32_hash_mode(files):
                         hash=hashedFile[1]) + fileExtension))
             shutil.move(hashedFile[0], filePath)
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=W0703
             sys.stderr.write('Addition of CRC32 hash \'%s\' to the filename of'
                              ' \'%s\' failed:\n\n%s\n\n%s\n'
                              % (crc, file, e, traceback.format_exc()))
@@ -888,7 +894,7 @@ def md5_hash_mode(files):
         try:
             print(fileToHash, md5_checksum(fileToHash))
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=W0703
 
             # Informing user
             sys.stderr.write('\nFailed to generate an md5 hash for the file '
@@ -955,7 +961,7 @@ def check_sfv_file(checksumFile):
                 # Displaying results
                 display_results(fileToHash, crc, checksumFileCRC)
 
-            except Exception as e:
+            except Exception as e:  # pylint: disable=W0703
 
                 # Informing user
                 sys.stderr.write('Failed to hash \'%s\':\n\n%s\n\n%s\n' %
@@ -968,7 +974,7 @@ def check_sfv_file(checksumFile):
         # Displaying a summary of the hashing task's progress
         currentHashingTask_summary()
 
-    except Exception as e:
+    except Exception as e:  # pylint: disable=W0703
         sys.stderr.write('Failed to process the checksum file \'%s\':\n\n%s\n'
                          '\n%s\n' % (checksumFile, e, traceback.format_exc()))
 
@@ -1029,7 +1035,7 @@ def check_md5_file(checksumFile):
                 # Displaying results
                 display_results(fileToHash, md5, checksumFileMD5)
 
-            except Exception as e:
+            except Exception as e:  # pylint: disable=W0703
 
                 # Informing user
                 sys.stderr.write('Failed to hash \'%s\':\n\n%s\n\n%s\n' %
@@ -1042,7 +1048,7 @@ def check_md5_file(checksumFile):
         # Displaying a summary of the hashing task's progress
         currentHashingTask_summary()
 
-    except Exception as e:
+    except Exception as e:  # pylint: disable=W0703
         sys.stderr.write('Failed to process the checksum file \'%s\':\n\n%s\n'
                          '\n%s\n' % (checksumFile, e, traceback.format_exc()))
 
@@ -1118,7 +1124,8 @@ def md5_create_mode(files):
             # Removing common root directory from file path (first item in the
             # list will be empty). Removing directory slash as needed
             relativePath = fileToHash.split(commonPrefix)[1]
-            if relativePath[:1] == os.sep: relativePath = relativePath[1:]
+            if relativePath[:1] == os.sep:
+                relativePath = relativePath[1:]
 
             try:
 
@@ -1132,7 +1139,7 @@ def md5_create_mode(files):
                 display_results(fileToHash, fileHash,
                                 checksumFileGeneration=True)
 
-            except Exception as e:
+            except Exception as e:  # pylint: disable=W0703
 
                 # Informing user
                 sys.stderr.write('Failed to hash \'%s\':\n\n%s\n' %
@@ -1164,7 +1171,7 @@ def md5_create_mode(files):
         # Displaying a summary of the hashing task's progress
         currentHashingTask_summary()
 
-    except Exception as e:
+    except Exception as e:  # pylint: disable=W0703
         sys.stderr.write('Failed to write to the checksum file \'%s\':\n\n%s'
                          '\n\n%s\n' % (checksumFileOutput, e,
                                        traceback.format_exc()))
@@ -1223,7 +1230,8 @@ def sfv_create_mode(files):
             # Removing common root directory from file path (first item in the
             # list will be empty). Removing directory slash as needed
             relativePath = fileToHash.split(commonPrefix)[1]
-            if relativePath[:1] == os.sep: relativePath = relativePath[1:]
+            if relativePath[:1] == os.sep:
+                relativePath = relativePath[1:]
 
             try:
 
@@ -1237,7 +1245,7 @@ def sfv_create_mode(files):
                 display_results(fileToHash, fileHash,
                                 checksumFileGeneration=True)
 
-            except Exception as e:
+            except Exception as e:  # pylint: disable=W0703
 
                 # Informing user
                 sys.stderr.write('Failed to hash \'%s\':\n\n%s\n' %
@@ -1268,7 +1276,7 @@ def sfv_create_mode(files):
         # Displaying a summary of the hashing task's progress
         currentHashingTask_summary()
 
-    except Exception as e:
+    except Exception as e:  # pylint: disable=W0703
         sys.stderr.write('Failed to write to the checksum file \'%s\':\n\n%s\n'
                          '\n%s\n'
                          % (checksumFileOutput, e, traceback.format_exc()))
@@ -1295,7 +1303,7 @@ def ed2k_link_mode(files):
         try:
             print(ed2k_link(fileToHash))
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=W0703
 
             # Informing user
             sys.stderr.write('\nFailed to generate an eD2k link for the file '
