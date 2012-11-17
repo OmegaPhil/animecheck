@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-Version 0.3 2012.02.01
+Version 0.9 2012.11.17
 Copyright (c) 2009, Taoufik El Aoumari (v0.2)
 Copyright (c) 2012, OmegaPhil (v0.3-) - OmegaPhil+animecheck@gmail.com
 Copyright (c) 2012, Ricardo Constantino (v0.5) - wiiaboo@gmail.com
@@ -46,7 +46,7 @@ from optparse import OptionParser
 
 # Initialising variables
 addHashModeFiles = []
-VERSION = '0.8'
+VERSION = '0.9'  # Remember to update the notice at the top too
 addHashFormat = '{name} [{hash}]'
 done = 0
 currentHashingTask = {}

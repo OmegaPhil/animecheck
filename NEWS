@@ -1,3 +1,7 @@
+v0.9 (17.11.12):
+Fix script when ran under Python 3 - unicode arguments change from v0.6 broke in Python 3 (https://github.com/OmegaPhil/animecheck/issues/4 - credit wiiaboo)
+Cleaner reporting of missing files in checksum read modes (https://github.com/OmegaPhil/animecheck/issues/12)
+
 v0.8 (20.10.12):
 Fix for md5 checksum file processing - deal with files that weren't read in binary mode (https://github.com/OmegaPhil/animecheck/issues/11 - credit Kovensky on #JEEB)
 
