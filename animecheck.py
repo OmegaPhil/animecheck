@@ -957,6 +957,27 @@ def check_sfv_file(checksumFile):
                 # Displaying results
                 display_results(fileToHash, crc, checksumFileCRC)
 
+            # Capturing I/O errors to detect missing files
+            except IOError as e:
+
+                # Checking if the error relates to a missing file
+                if e.errno == 2:
+
+                    # It is - reporting the missing file concisely
+                    sys.stderr.write('Failed to hash \'%s\' - file does not '
+                                     'exist!\n' % fileToHash)
+
+                else:
+
+                    # It doesn't - treating as a normal unknown error
+                    sys.stderr.write('Failed to hash \'%s\':\n\n%s\n\n%s\n' %
+                                     (fileToHash, e, traceback.format_exc()))
+
+                # Registering error and moving to next file
+                currentHashingTask_error(e)
+                continue
+
+            # Capturing unknown errors
             except Exception as e:  # pylint: disable=W0703
 
                 # Informing user
@@ -1031,6 +1052,27 @@ def check_md5_file(checksumFile):
                 # Displaying results
                 display_results(fileToHash, md5, checksumFileMD5)
 
+            # Capturing I/O errors to detect missing files
+            except IOError as e:
+
+                # Checking if the error relates to a missing file
+                if e.errno == 2:
+
+                    # It is - reporting the missing file concisely
+                    sys.stderr.write('Failed to hash \'%s\' - file does not '
+                                     'exist!\n' % fileToHash)
+
+                else:
+
+                    # It doesn't - treating as a normal unknown error
+                    sys.stderr.write('Failed to hash \'%s\':\n\n%s\n\n%s\n' %
+                                     (fileToHash, e, traceback.format_exc()))
+
+                # Registering error and moving to next file
+                currentHashingTask_error(e)
+                continue
+
+            # Capturing unknown errors
             except Exception as e:  # pylint: disable=W0703
 
                 # Informing user
