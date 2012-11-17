@@ -1371,9 +1371,13 @@ if (options.checksum_read_mode + options.sfv_create_mode +
 
 # 'Decoding' all parameters to unicode - data is expected as UTF-8 (of which
 # ASCII is a subset of). Without this, python treats the parameters as ASCII
-# strings and subsequently dies when it manipulates a string that contains a
-# byte value >126
-args = [arg.decode('utf-8') for arg in args]
+# strings in v2 and subsequently dies when it manipulates a string that
+# contains a byte value >126. In v3, the strings are unicode as they should
+# be - and string objects don't have the decode method
+try:
+    args = [arg.decode('utf-8') for arg in args]
+except AttributeError:
+    pass
 
 # Dealing with various modes to run
 if options.checksum_read_mode:
