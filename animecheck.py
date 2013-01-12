@@ -872,7 +872,8 @@ def crc32_hash_mode(files):
         except Exception as e:  # pylint: disable=W0703
             sys.stderr.write('Addition of CRC32 hash \'%s\' to the filename of'
                              ' \'%s\' failed:\n\n%s\n\n%s\n'
-                             % (crc, file, e, traceback.format_exc()))
+                             % (crc, hashedFile[0], e,
+                                traceback.format_exc()))
             continue
 
 
@@ -1120,9 +1121,10 @@ def checksum_read_mode(files):
 def md5_create_mode(files):
     '''Creates an md5 checksum file based off passed files'''
 
-    # Initialising variables
+    # Initialising variables - checksumFileOutput is used in error handler
     checksumFile = None
     errorOccurred = False
+    checksumFileOutput = None
 
     try:
 
@@ -1221,9 +1223,10 @@ def md5_create_mode(files):
 def sfv_create_mode(files):
     '''Creates an sfv checksum file based off passed files'''
 
-    # Initialising variables
+    # Initialising variables - checksumFileOutput is used in error handler
     checksumFile = None
     errorOccurred = False
+    checksumFileOutput = None
 
     try:
 
