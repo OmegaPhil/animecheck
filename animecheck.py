@@ -566,31 +566,28 @@ def walk_error_handler(walkError):
 def open_file(fileToOpen):
     '''Opens files regardless of encoding...'''
 
-    # Custom function has been created as Python, even though it is 'unicode
-    # capable', cannot cope with Just Reading a UTF-16 file (so far)
+    # Python cannot Just Read files, even though it is 'unicode capable'. The
+    # following is basically babysitting the opening process with expected
+    # encodings
+    # Attempting to open the given file - tries UTF-16 (which has an implicit
+    # BOM) and then UTF-8 with BOM (Windowsism) - if the BOM isnt there this
+    # fact is ignored and the data is treated as proper UTF-8. If none of these
+    # work, the file is probably invalid data, since ASCII is valid UTF-8
+    # I have to read the entire file in (dont use read - returns string) as
+    # otherwise Python doesnt read any data on open and therefore doesn't know
+    # when the encoding is invalid, thus making this function pointless!
+    try:
+        return io.open(fileToOpen, encoding='utf-16').readlines()
+    except Exception:
+        try:
+            return io.open(fileToOpen, encoding='utf-8-sig').readlines()
+        except Exception as e:
 
-    # Reading whole file in at once - done like this to work around
-    # encoding issues (binary to prevent any attempt at interpretation
-    # which would just lead to corruption). Even io.open fails miserably
-    # on its own when it automatically tries to convert the leading BOM into
-    # UTF-8
-    fileData = io.open(fileToOpen, 'rb').read()
-
-    # Detecting utf16 encoding and decoding to sane data. Appears
-    # to also thankfully kill off the BOM. The following StringIO wants
-    # unicode so everything else is encoded accordingly (even with
-    # unicode_literals encoding is NOT UTF-8 by default)
-    if fileData.startswith(codecs.BOM_UTF16):
-        fileData = fileData.decode('utf16')
-    else:
-        fileData = fileData.decode('utf8')
-
-    # You apparently cant just split the resulting string into newlines and
-    # then iterate over them, so returning a file-like object
-    # io's StringIO translates newlines, raw StringIO doesnt - however even
-    # though io's 'universal newlines' translation is supposed to be default
-    # on (None), it isnt unless you explicitly pass None!!
-    return io.StringIO(fileData, None)
+            # File is invalid - warning user and exiting
+            sys.stderr.write('\nERROR: Unable to open \'%s\' - invalid'
+                             ' encoding? Reported error:\n\n%s' %
+                             (fileToOpen, str(e)))
+            sys.exit(1)
 
 
 def humanise_bytes(byteCount, precision=2):
@@ -1024,12 +1021,9 @@ def check_sfv_file(checksumFile):
 
     try:
 
-        # Opening file, resulting in usable text regardless of original
-        # encoding
-        fileData = open_file(checksumFile)
-
-        # Looping through all lines
-        for line in fileData:
+        # Looping through all lines in checksum file (function is tolerant
+        # of different encodings)
+        for line in open_file(checksumFile):
 
             # Ignoring comments
             if line[0] != ';':
@@ -1117,12 +1111,9 @@ def check_md5_file(checksumFile):
 
     try:
 
-        # Opening file, resulting in usable text regardless of original
-        # encoding
-        fileData = open_file(checksumFile)
-
-        # Looping through all lines
-        for line in fileData:
+        # Looping through all lines in checksum file (function is tolerant
+        # of different encodings)
+        for line in open_file(checksumFile):
 
             # Ignoring comments
             if line[0] != ';':
