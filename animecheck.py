@@ -84,6 +84,21 @@ try:
 except NameError:
     pass
 
+# In Python 2 on Debian, despite the fact that the locale is clearly UTF-8, the
+# default encoding is set to ASCII. This is unacceptable - the requirement to
+# deal with and print unicode filenames is trivial. In Python 3, the proper
+# default of UTF-8 is already set. This was what essentially caused the
+# original unicode errors on processing program arguments, and is also
+# responsible for the encoding Python decides to use when it has the
+# responsibility for writing stdout/err to file
+if sys.getdefaultencoding() != 'utf-8':
+
+    # Non-UTF-8 encoding in use (probably ASCII) - fixing (the
+    # setdefaultencoding method is removed after it is set in a site
+    # customisation script during Python startup I think - hence the reload)
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+
 
 def crc32_checksum(filename):
     '''CRC32 hashes the passed file, displaying the hashing progress'''
@@ -1509,16 +1524,6 @@ if (options.checksum_read_mode + options.sfv_create_mode +
 #                        ' error occurred when testing to see if cfv is '
 #                        'installed:\n\n%s\n\n' % (parser.get_usage(), e))
 #        sys.exit(1)
-
-# 'Decoding' all parameters to unicode - data is expected as UTF-8 (of which
-# ASCII is a subset of). Without this, python treats the parameters as ASCII
-# strings in v2 and subsequently dies when it manipulates a string that
-# contains a byte value >126. In v3, the strings are unicode as they should
-# be - and string objects don't have the decode method
-try:
-    args = [arg.decode('utf-8') for arg in args]
-except AttributeError:
-    pass
 
 # Dealing with various modes to run
 if options.checksum_read_mode:
