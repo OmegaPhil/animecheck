@@ -50,6 +50,7 @@ VERSION = '0.9'  # Remember to update the notice at the top too
 addHashFormat = '{name} [{hash}]'
 done = 0
 currentHashingTask = {}
+listingError = False
 
 # Defining terminal escape codes based on OS
 if os.name != 'nt':
@@ -434,15 +435,34 @@ def recursive_file_search(pathsToSearch):
     '''Recurses through all directories and files given to generate a complete
     list of files'''
 
+    global listingError
+
     # Initialising variables
     foundFiles = []
+    sanitisedFiles = []
 
     # Looping through all passed files and directories
     for path in pathsToSearch:
         if os.path.isdir(path):
 
-            # Recursively walking through directories discovered
-            for directory_path, _, directory_files in os.walk(path):
+            # Preparing the path to submit to os.walk - in Python 2, if a
+            # unicode string is passed and a subsequent file/directory has
+            # invalid bytes (invalid codepoint sequence) in its' name, any
+            # attempt by Python to manipulate the string will cause an
+            # unhandled UnicodeDecodeError. Bytes or strings don't have this
+            # issue as they are raw data and therefore not interpreted. In
+            # Python 3, strings are unicode by default, and the default
+            # behaviour for invalid bytes is to represent them by surrogate
+            # pairs rather than throwing an error
+            # Note that 'bytes()' in Python 2 is an alias to 'str()'
+            if sys.version_info.major < 3:
+                path = str(path)
+
+            # Recursively walking through directories discovered. If you don't
+            # pass an error handler, errors associated with listing the passed
+            # directory are silently ignored!!
+            for directory_path, _, directory_files in os.walk(path,
+                                                onerror=walk_error_handler):
 
                 # Adding all discovered files to the main list
                 for directory_file in directory_files:
@@ -457,8 +477,75 @@ def recursive_file_search(pathsToSearch):
             sys.stderr.write('Path \'%s\' is invalid' % path)
             sys.exit(1)
 
-    # Returning discovered files
-    return foundFiles
+    # Checking the file paths for invalid bytes in filenames (this can
+    # happen due to extracting a zip that doesn't properly maintain or deal
+    # with the encoding the filenames were compressed in, e.g.)
+    for foundFile in foundFiles:
+        try:
+
+            if sys.version_info.major < 3:
+
+                # File paths at this point should be bytes - converting to
+                # unicode (and subsequently catching invalid encoding). Note
+                # that replacing/escaping invalid characters at this stage
+                # merely causes a later stage to cock up
+                sanitisedFiles.append(unicode(foundFile))
+            else:
+
+                # For Python 3, the string is already a unicode one, with
+                # invalid bytes represented by surrogate pairs. Therefore, to
+                # detect the invalid data, I need to encode it with UTF-8 to
+                # return bytes - the encoder will choke and throw an error. I
+                # don't keep the result as I want a unicode string, not bytes
+                _ = foundFile.encode('utf-8')
+                sanitisedFiles.append(foundFile)
+
+        except Exception:
+
+            # Invalid encoding detected - warning user and recording the fact
+            # a listing error happened. In Python 2, foundFile is a string and
+            # therefore plain bytes that needs to be decoded to unicode, in
+            # Python 3 the string is already unicode with surrogate pairs used
+            # to mark the invalid bytes and is therefore safe to print and
+            # write
+            if sys.version_info.major < 3:
+                badPath = unicode(foundFile, errors='replace')
+            else:
+                badPath = foundFile
+            sys.stderr.write('\nThe file \'%s\' has invalid encoding in its '
+                             'path and will not be hashed!\n' % badPath)
+            listingError = True
+
+    # Returning sanitised files
+    return sanitisedFiles
+
+
+def walk_error_handler(walkError):
+    '''Function called when recursive_file_search's os.walk call encounters
+    errors'''
+
+    global listingError
+
+    # Detecting OSErrors (the only error that is supposed to be propagated)
+    # These occur during the initial directory listing of os.walk so should
+    # indicate a directory isn't hashable
+    if isinstance(walkError, OSError):
+
+        # Warning user
+        sys.stderr.write('\nERROR: Unable to list the directory \'%s\' - files'
+                         ' contained will not be hashed!\nReported error: %s\n'
+                         % (walkError.filename, str(walkError)))
+    else:
+
+        # Unknown error detected - warning user
+        sys.stderr.write('\nERROR: Unexpected error whilst listing files in a '
+                         'directory - please read the error message to see '
+                         'which directory will not be hashed:\n%s' %
+                         str(walkError))
+
+    # Recording the fact an error has occurred (this happens before the
+    # hashing task has been initialised)
+    listingError = True
 
 
 def open_file(fileToOpen):
@@ -643,7 +730,8 @@ def currentHashingTask_update(hashedData=0, fileSize=0, hashedSoFar=0,
                                       currentHashingTask['dataToHash']))
 
         # TODO: Bug here in sfv creation mode - have had an instance of the
-        # above. Can't recreate though...
+        # above. Can't recreate though... 14.01.13: Another instance after
+        # hashing >400,000 files...
 
         # Updating data amounts
         currentHashingTask['dataHashed'] += hashedData
@@ -805,6 +893,13 @@ def currentHashingTask_summary():
           % (get_date(started), get_date(finished), elapsed, dataHashed,
              averageSpeed))
 
+    # Alerting user to the fact listing errors have happened - otherwise the
+    # potential 0 errors reported above is a lie
+    if listingError:
+        sys.stderr.write('WARNING: Some directories/files were not hashed due '
+                         'to failures in the initial discovery stage - please '
+                         'see errors noted before hashing started\n\n')
+
 
 def crc32_hash_mode(files):
     '''CRC32 hashes passed files and displays results'''
@@ -839,7 +934,8 @@ def crc32_hash_mode(files):
             currentHashingTask_error(e)
             continue
 
-    # Displaying a summary of the hashing task's progress
+    # Displaying a summary of the hashing task's progress - also adds a note
+    # about listing errors
     currentHashingTask_summary()
 
     # If files without hashes exist and the add hash mode is 'ask', proceeding
@@ -1207,8 +1303,9 @@ def md5_create_mode(files):
             print('\nChecksum file \'' + checksumFileOutput + '\' has been '
                   'written successfully')
         else:
-            print('\nWarning! Checksum file \'' + checksumFileOutput + '\' has'
-                  ' not been written successfully! See above for errors')
+            sys.stderr.write('\nWARNING: Checksum file \'%s\' has not been '
+                             'written successfully! See above for errors\n'
+                             % checksumFileOutput)
 
         # Displaying a summary of the hashing task's progress
         currentHashingTask_summary()
@@ -1237,9 +1334,8 @@ def sfv_create_mode(files):
         files, commonPrefix = normalise_and_validate_files(files, 'sfv')
 
         # Debug code
-#        print commonPrefix
-#        print os.path.basename(commonPrefix)
-#        print files
+        #print(type(commonPrefix))
+        #print(type(files))
 
         # Setting checksumFileOutput. Basename implementation is broken,
         # removing trailing os.sep to make it work...
