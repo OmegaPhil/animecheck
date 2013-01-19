@@ -96,7 +96,7 @@ if sys.getdefaultencoding() != 'utf-8':
     # setdefaultencoding method is removed after it is set in a site
     # customisation script during Python startup I think - hence the reload)
     reload(sys)
-    sys.setdefaultencoding('utf-8')
+    sys.setdefaultencoding('utf-8')  # pylint: disable=E1101
 
 
 def crc32_checksum(filename):
@@ -458,7 +458,7 @@ def recursive_file_search(pathsToSearch):
     '''Recurses through all directories and files given to generate a complete
     list of files'''
 
-    global listingError
+    global listingError  # pylint: disable=W0603
 
     # Initialising variables
     foundFiles = []
@@ -523,7 +523,7 @@ def recursive_file_search(pathsToSearch):
                 _ = foundFile.encode('utf-8')
                 sanitisedFiles.append(foundFile)
 
-        except Exception:
+        except Exception:  # pylint: disable=W0703
 
             # Invalid encoding detected - warning user and recording the fact
             # a listing error happened. In Python 2, foundFile is a string and
@@ -547,7 +547,7 @@ def walk_error_handler(walkError):
     '''Function called when recursive_file_search's os.walk call encounters
     errors'''
 
-    global listingError
+    global listingError  # pylint: disable=W0603
 
     # Detecting OSErrors (the only error that is supposed to be propagated)
     # These occur during the initial directory listing of os.walk so should
@@ -586,10 +586,10 @@ def open_file(fileToOpen):
     # when the encoding is invalid, thus making this function pointless!
     try:
         return io.open(fileToOpen, encoding='utf-16').readlines()
-    except Exception:
+    except Exception:  # pylint: disable=W0703
         try:
             return io.open(fileToOpen, encoding='utf-8-sig').readlines()
-        except Exception as e:
+        except Exception as e:  # pylint: disable=W0703
 
             # File is invalid - warning user and exiting
             sys.stderr.write('\nERROR: Unable to open \'%s\' - invalid'
