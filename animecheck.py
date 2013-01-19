@@ -400,10 +400,12 @@ def normalise_and_validate_files(files, checksumType):
     '''Validates then returns a list of given files, ensuring they have
     absolute paths'''
 
-    # Normalising the file paths to ensure all inputs are absolute paths
+    # Normalising the file paths to ensure all inputs are absolute paths,
+    # and ignoring symlinks/hard links if requested
     normalisedFiles = []
     for fileToHash in files:
-        normalisedFiles.append(os.path.abspath(fileToHash))
+        if not options.ignore_links or not os.path.islink(fileToHash):
+            normalisedFiles.append(os.path.abspath(fileToHash))
 
     # Debug code
     #print(normalisedFiles)
@@ -1470,6 +1472,10 @@ metavar='checksumMode', action='store_true', default=False)
 parser.add_option('-e', '--ed2k-link-mode', dest='ed2k_link_mode',
 help='mode to hash given files and output eD2k links',
 metavar='checksumMode', action='store_true', default=False)
+parser.add_option('-l', '--links', dest='ignore_links',
+help='follow symlinks and hardlinks when encountered. By default links are '
+'ignored completely unless they are referenced in a checksum file being '
+'checked', metavar='ignore_links', action='store_false', default=True)
 parser.add_option('-m', '--md5-create-mode', dest='md5_create_mode',
 help='mode to create an md5 file from the files passed - see -o',
 metavar='md5_create_mode', action='store_true', default=False)
