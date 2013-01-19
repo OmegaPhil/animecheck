@@ -336,22 +336,25 @@ def display_results(fileToHash, obtainedHash, checksumFileHash=None,
             dest_sum = re.split(r'([a-f0-9]{8})', fileToHash,
                                 flags=re.IGNORECASE)[-2]
 
-            # Setting colours depending on good/bad hash and registering a
-            # corrupt file as appropriate
+            # Setting colours and eventual message output destination
+            # depending on good/bad hash and registering a corrupt file as
+            # appropriate
             if obtainedHash == dest_sum.upper():
                 h_in = H_GREEN
+                outputTo = sys.stdout
             else:
                 h_in = H_RED
                 currentHashingTask_file_corrupt(fileToHash)
+                outputTo = sys.stderr
 
             # Obtaining filename fragments before and after the hash
             sfile = fileToHash.split(dest_sum)
 
             # Printing results with coloured hash at the beginning and in
-            # the file path
+            # the file path, to the relevant output depending on success
             print("%s%s%s   %s%s%s%s%s" % (h_in, obtainedHash, H_NULL,
                                            sfile[0], h_in, dest_sum, H_NULL,
-                                           sfile[1]))
+                                           sfile[1]), file=outputTo)
 
         except(IndexError, ValueError):
 
@@ -369,18 +372,22 @@ def display_results(fileToHash, obtainedHash, checksumFileHash=None,
 
     elif checksumFileHash:
 
-        # hash is from checksum file - setting colours depending on good/bad
-        # hash. obtainedHash is uppercased here as md5 hashes are outputted
-        # lowercase. Registering a corrupt file as appropriate
+        # hash is from checksum file - setting colours and eventual output
+        # destination depending on good/bad hash. obtainedHash is uppercased
+        # here as md5 hashes are outputted lowercase. Registering a corrupt
+        # file as appropriate
         if obtainedHash.upper() == checksumFileHash.upper():
             h_in = H_GREEN
+            outputTo = sys.stdout
         else:
             h_in = H_RED
             currentHashingTask_file_corrupt(fileToHash)
+            outputTo = sys.stderr
 
         # Printing results with coloured hash at the beginning and in the
-        # file path
-        print("%s%s%s   %s" % (h_in, obtainedHash, H_NULL, fileToHash))
+        # file path, to the relevant output depending on success
+        print("%s%s%s   %s" % (h_in, obtainedHash, H_NULL, fileToHash),
+              file=outputTo)
 
     elif checksumFileGeneration:
 
@@ -526,8 +533,8 @@ def recursive_file_search(pathsToSearch):
                 badPath = unicode(foundFile, errors='replace')
             else:
                 badPath = foundFile
-            sys.stderr.write('\nThe file \'%s\' has invalid encoding in its '
-                             'path and will not be hashed!\n' % badPath)
+            sys.stderr.write('\nERROR: The file \'%s\' has invalid encoding in'
+                             ' its path and will not be hashed!\n' % badPath)
             listingError = True
 
     # Returning sanitised files
