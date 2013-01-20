@@ -1,3 +1,17 @@
+v0.10 (20.01.13):
+CRITICAL UPDATE - see below.
+
+Fixed error handler in md5_create_mode and sfv_create_mode referencing checksumFileOutput before it was assigned (https://github.com/OmegaPhil/animecheck/issues/13)
+os.walk was ignoring errors when generating a list of files to hash!! This incompetence has been fixed - user is warned when errors happen whilst listing directories (https://github.com/OmegaPhil/animecheck/issues/13)
+More unicode bullshit 1! Script now copes with invalid encoding in paths (e.g. from an extracted Japanese zip) and alerts the user to the fact the files won't be hashed (https://github.com/OmegaPhil/animecheck/issues/13)
+More unicode bullshit 2! Python 2 under Debian uses the invalid default encoding of ASCII even in a UTF-8 locale - this is what caused the original 'program arguments are ASCII' error. I discovered this after Python failed to write to a stderr redirected file as it was writing in ASCII when everything else was unicode (...) (https://github.com/OmegaPhil/animecheck/issues/16)
+Hash failures are now outputted to stderr rather than stdout (this should be the case for all error and warning messages now) (https://github.com/OmegaPhil/animecheck/issues/17)
+DEFAULT BEHAVIOUR CHANGE: Symlinks and hardlinks are now ignored by default - '-l/--links' is now available to pay attention to them again (https://github.com/OmegaPhil/animecheck/issues/14)
+
+The changes here are a result of hashing >400,000 files of >700GB to create an sfv file to prove a drive copy operation worked) - the script should now be more usable with large hashing jobs (redirect stderr to file to avoid hash success spam).   
+
+Because of this further unicode incompetence and os.walk's retarded ignoring of errors by default, I can't consider this script to have reached v1 yet - there's no reason to expect that no further bullshit will happen at this stage.
+
 v0.9 (17.11.12):
 Fix script when ran under Python 3 - unicode arguments change from v0.6 broke in Python 3 (https://github.com/OmegaPhil/animecheck/issues/4 - credit wiiaboo)
 Cleaner reporting of missing files in checksum read modes (https://github.com/OmegaPhil/animecheck/issues/12)
