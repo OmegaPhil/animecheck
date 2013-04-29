@@ -117,7 +117,7 @@ def crc32_checksum(filename):
 
                 # Reading in a chunk of the data
                 data = fileToHash.read(buff_size)
-                done += buff_size
+                done += len(data)
 
                 # Updating the hashing task status
                 if data:
@@ -170,7 +170,7 @@ def md5_checksum(filename):
 
                 # Reading in a chunk of the data
                 data = fileToHash.read(buff_size)
-                done += buff_size
+                done += len(data)
 
                 # Updating the hashing task status
                 if data:
