@@ -52,25 +52,21 @@ currentHashingTask = {}
 listingError = False
 
 # Defining terminal escape codes based on OS
-if os.name != 'nt':
-    H_NULL = '\x1b[00;00m'
-    H_RED = '\x1b[31;01m'
-    H_GREEN = '\x1b[32;01m'
-    #P_RESET = '\x08'  # Backspace...
 
-    # Clear to end of line then carriage return. This is usable now that there
-    # are only two terminal updates a second
-    P_RESET = '\x1B[K\x0D'
+H_NULL = '\x1b[00;00m'
+H_RED = '\x1b[31;01m'
+H_GREEN = '\x1b[32;01m'
+#P_RESET = '\x08'  # Backspace...
 
-else:
+# Clear to end of line then carriage return. This is usable now that there
+# are only two terminal updates a second
+P_RESET = '\x1B[K\x0D'
+
+if os.name == 'nt':
     try:
-        from colorama import init, Fore, Style  # pylint: disable=F0401
+        from colorama import init # pylint: disable=F0401
 
         init()
-
-        H_NULL = Fore.RESET + Style.NORMAL
-        H_RED = Fore.RED + Style.BRIGHT
-        H_GREEN = Fore.GREEN + Style.BRIGHT
 
     except ImportError:
         H_NULL = H_RED = H_GREEN = ''
