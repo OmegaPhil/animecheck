@@ -395,12 +395,10 @@ def normalise_and_validate_files(files, checksumType):
     '''Validates then returns a list of given files, ensuring they have
     absolute paths'''
 
-    # Normalising the file paths to ensure all inputs are absolute paths,
-    # and ignoring symlinks/hard links if requested
+    # Normalising the file paths to ensure all inputs are absolute paths
     normalisedFiles = []
     for fileToHash in files:
-        if not options.ignore_links or not os.path.islink(fileToHash):
-            normalisedFiles.append(os.path.abspath(fileToHash))
+        normalisedFiles.append(os.path.abspath(fileToHash))
 
     # Debug code
     #print(normalisedFiles)
@@ -495,10 +493,17 @@ def recursive_file_search(pathsToSearch):
             sys.stderr.write('Path \'%s\' is invalid' % path)
             sys.exit(1)
 
-    # Checking the file paths for invalid bytes in filenames (this can
-    # happen due to extracting a zip that doesn't properly maintain or deal
-    # with the encoding the filenames were compressed in, e.g.)
+    # Looping through all found files
     for foundFile in foundFiles:
+
+        # Ignoring the file if it is a symlink/hardlink when these are
+        # requested to be ignored
+        if options.ignore_links and os.path.islink(foundFile):
+            continue
+
+        # Checking the file paths for invalid bytes in filenames (this can
+        # happen due to extracting a zip that doesn't properly maintain or deal
+        # with the encoding the filenames were compressed in, e.g.)
         try:
 
             if sys.version_info.major < 3:
