@@ -52,7 +52,6 @@ currentHashingTask = {}
 listingError = False
 
 # Defining terminal escape codes based on OS
-
 H_NULL = '\x1b[00;00m'
 H_RED = '\x1b[31;01m'
 H_GREEN = '\x1b[32;01m'
