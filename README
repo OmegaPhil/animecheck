@@ -42,4 +42,4 @@ OmegaPhil: OmegaPhil+animecheck@gmail.com
 Credits
 =======
 
-wiiaboo (Ricardo Constantino): Code fixes to support Windows command prompt, fixes to support Python v3 whilst keeping v2.x compatibility (v0.5).
+wiiaboo (Ricardo Constantino): Code fixes to support Windows command prompt, fixes to support Python v3 whilst keeping v2.x compatibility (v0.5, 0.11).

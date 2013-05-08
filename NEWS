@@ -1,3 +1,8 @@
+v0.11 (08.05.13):
+Actually ignore symlinks in MD5 hashing and ed2k link generation modes (https://github.com/OmegaPhil/animecheck/issues/14)
+When ran under Windows, ANSI escape codes are now used - cleanup courtesy of wiiaboo
+Possibility of fixing a rare bug where the script is told more data has been hashed from a file than it was expecting (https://github.com/OmegaPhil/animecheck/issues/18)
+
 v0.10 (20.01.13):
 CRITICAL UPDATE - see below.
 

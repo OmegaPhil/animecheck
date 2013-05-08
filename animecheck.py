@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 '''
-Version 0.10 2013.01.20
+Version 0.11 2013.05.08
 Copyright (c) 2009, Taoufik El Aoumari (v0.2)
 Copyright (c) 2012-2013, OmegaPhil (v0.3-) - OmegaPhil+animecheck@gmail.com
-Copyright (c) 2012, Ricardo Constantino (v0.5) - wiiaboo@gmail.com
+Copyright (c) 2012-2013, Ricardo Constantino (v0.5, 0.11) - wiiaboo@gmail.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ from optparse import OptionParser
 
 # Initialising variables
 addHashModeFiles = []
-VERSION = '0.10'  # Remember to update the notice at the top too
+VERSION = '0.11'  # Remember to update the notice at the top too
 addHashFormat = '{name} [{hash}]'
 done = 0
 currentHashingTask = {}
