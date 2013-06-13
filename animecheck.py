@@ -1467,6 +1467,9 @@ def ed2k_link_mode(files):
         try:
             print(ed2k_link(fileToHash))
 
+            # Updating hashing task
+            currentHashingTask_update(fileHashed=True)
+
         except Exception as e:  # pylint: disable=W0703
 
             # Informing user
@@ -1477,6 +1480,9 @@ def ed2k_link_mode(files):
             # Registering error and moving to next file
             currentHashingTask_error(e)
             continue
+
+    # Displaying a summary of the hashing task's progress
+    currentHashingTask_summary()
 
 
 # Configuring and parsing passed options
