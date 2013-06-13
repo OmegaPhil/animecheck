@@ -1,3 +1,9 @@
+v1 (13.06.13):
+This script has now been around long enough and has done its core job adequately enough to reach version 1 finally! Only a minor functionality update from the user perspective:
+
+-n/--no-summary added to prevent outputting a hashing task summary (https://github.com/OmegaPhil/animecheck/issues/21)
+ed2k link mode now outputs a hashing task summary - all modes should now do so (https://github.com/OmegaPhil/animecheck/issues/21)
+
 v0.11 (08.05.13):
 Actually ignore symlinks in MD5 hashing and ed2k link generation modes (https://github.com/OmegaPhil/animecheck/issues/14)
 When ran under Windows, ANSI escape codes are now used - cleanup courtesy of wiiaboo
