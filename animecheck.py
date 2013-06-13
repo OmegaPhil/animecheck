@@ -316,19 +316,40 @@ def ed2k_link(filename):
                  ed2kHash))
 
 
-def display_results(fileToHash, obtainedHash, checksumFileHash=None,
-                    checksumFileGeneration=False):
+def display_results(fileToHash, obtainedHash, displayMode,
+                    checksumFileHash=None, hashRegex=None):
     '''Displays results of a hashing operation'''
 
-    # Splitting based on whether a checksum file is being checked/generated or
-    # not
-    if not checksumFileHash and not checksumFileGeneration:
+    # Validating passed display mode
+    if (displayMode != 'colourHashWithHashInFilename'
+        and displayMode != 'colourHash'
+        and displayMode != 'hash'):
+
+        # Invalid display mode specified - erroring
+        sys.stderr.write('ERROR: display_results was called with an invalid '
+                         'display mode (\'%s\')\n' % displayMode)
+        sys.exit()
+
+    if (displayMode == 'colourHashWithHashInFilename'
+        and hashRegex == None):
+
+        # Coloured filename hash was specified, but the regex necessary for
+        # detecting the hash was not specified - erroring
+        sys.stderr.write('ERROR: display_results was called with the '
+                         '\'colourHashWithHashInFilename\' display mode, '
+                         'however no regex was passed to detect the filename'
+                         ' hash with\n')
+        sys.exit()
+
+    # Dealing with different requested modes
+    if displayMode == 'colourHashWithHashInFilename':
         try:
 
-            # It isn't - called from crc32_hash_mode. Obtaining the hash from
-            # the filename (penultimate fragment) - remember that re does not
-            # support POSIX character classes
-            dest_sum = re.split(r'([a-f0-9]{8})', fileToHash,
+            # Hashes are to be displayed coloured based on success, with an
+            # approriately-coloured hash in the filename too. Obtaining the
+            # hash from the filename (penultimate fragment) - remember that re
+            # does not support POSIX character classes
+            dest_sum = re.split(r'%s' % hashRegex, fileToHash,
                                 flags=re.IGNORECASE)[-2]
 
             # Setting colours and eventual message output destination
@@ -365,12 +386,12 @@ def display_results(fileToHash, obtainedHash, checksumFileHash=None,
             # Registering no hash file
             currentHashingTask_file_no_hash(fileToHash)
 
-    elif checksumFileHash:
+    elif displayMode == 'colourHash':
 
-        # hash is from checksum file - setting colours and eventual output
-        # destination depending on good/bad hash. obtainedHash is uppercased
-        # here as md5 hashes are outputted lowercase. Registering a corrupt
-        # file as appropriate
+        # Hashes are to be displayed coloured, but any hashes that may be
+        # present in the relevant filename are to be ignored. obtainedHash is
+        # uppercased here as md5 hashes are outputted lowercase. Registering a
+        # corrupt file as appropriate
         if obtainedHash.upper() == checksumFileHash.upper():
             h_in = H_GREEN
             outputTo = sys.stdout
@@ -384,10 +405,9 @@ def display_results(fileToHash, obtainedHash, checksumFileHash=None,
         print("%s%s%s   %s" % (h_in, obtainedHash, H_NULL, fileToHash),
               file=outputTo)
 
-    elif checksumFileGeneration:
+    elif displayMode == 'hash':
 
-        # Hash is from hashing a file as part of checksum file generation
-        # No colours are to be used here
+        # No colours are to be displayed - just the hash and file path
         print("%s   %s" % (obtainedHash, fileToHash))
 
 
@@ -921,18 +941,18 @@ def currentHashingTask_summary():
                          'see errors noted before hashing started\n\n')
 
 
-def hash_files(files, algorithm):
-    '''Hashes passed files with the algorithm requested, and displays and acts
-    on results as appropriate'''
+def hash_files(files, algorithm, hashInFilename=False):
+    '''Hashes passed files with the algorithm requested, displays results and
+    adds resulting hashes to filenames when requested'''
 
     # Validating algorithm
     if algorithm != 'crc32' and algorithm != 'md5':
-        
-        # Invalid algorithm specified - erroring
-        sys.stderr.write('ERROR: Failed to hash the file \'%s\':\n\n%s\n\n%s\n'
-                         % (fileToHash, e, traceback.format_exc()))
 
-    
+        # Invalid algorithm specified - erroring
+        sys.stderr.write('ERROR: hash_files was called with an invalid hashing'
+                         ' algorithm (\'%s\')\n' % algorithm)
+        sys.exit()
+
     # Converting potential passed directories into their nested files
     files = recursive_file_search(files)
 
@@ -944,20 +964,28 @@ def hash_files(files, algorithm):
     for fileToHash in files:
         try:
 
-            # Hashing file
-            crc = crc32_checksum(fileToHash)
+            # Hashing file with appropriate algorithm
+            if algorithm == 'crc32':
+                checksum = crc32_checksum(fileToHash)
+            elif algorithm == 'md5':
+                checksum = md5_checksum(fileToHash)
 
             # Updating hashing task
             currentHashingTask_update(fileHashed=True)
 
-            # Displaying results
-            display_results(fileToHash, crc)
+            # Displaying results with appropriate mode
+            if hashInFilename:
+                display_results(fileToHash, checksum,
+                                'colourHashWithHashInFilename', None,
+                                '([a-f0-9]{8})')
+            else:
+                display_results(fileToHash, checksum, 'hash')
 
         except Exception as e:  # pylint: disable=W0703
 
             # Informing user
-            sys.stderr.write('\nERROR: Failed to hash the file \'%s\':\n\n%s\n'
-                             '\n%s\n' % (fileToHash, e,
+            sys.stderr.write('\nERROR: Failed to %s hash the file \'%s\':\n\n'
+                             '%s\n\n%s\n' % (algorithm, fileToHash, e,
                                          traceback.format_exc()))
 
             # Registering error and moving to next file
@@ -968,12 +996,16 @@ def hash_files(files, algorithm):
     # about listing errors
     currentHashingTask_summary()
 
-    # If files without hashes exist and the add hash mode is 'ask', proceeding
-    # only if the user wants to
-    if (len(addHashModeFiles) > 0
-        and options.addHashMode == 'ask'
-        and input('Do you want to add CRC32 hashes to the filenames of files'
-        ' without them (Y/n)? ').lower() == 'n'):
+    # Exiting if hashes are not to be added to filenames or there are no files
+    # without hashes in their filenames
+    if len(addHashModeFiles) == 0 or not hashInFilename:
+        sys.exit()
+
+    # There are files without hashes in their filenames - if the add hash mode
+    # is 'ask', proceeding only if the user wants to
+    if (options.addHashMode == 'ask'
+        and input('Do you want to add %s hashes to the filenames of files'
+        ' without them (Y/n)? ' % algorithm).lower() == 'n'):
         print('Hashes will not be added to files without them')
         sys.exit()
 
@@ -996,36 +1028,10 @@ def hash_files(files, algorithm):
             shutil.move(hashedFile[0], filePath)
 
         except Exception as e:  # pylint: disable=W0703
-            sys.stderr.write('ERROR: Addition of CRC32 hash \'%s\' to the '
+            sys.stderr.write('ERROR: Addition of %s hash \'%s\' to the '
                              'filename of \'%s\' failed:\n\n%s\n\n%s\n'
-                             % (crc, hashedFile[0], e,
+                             % (algorithm, checksum, hashedFile[0], e,
                                 traceback.format_exc()))
-            continue
-
-
-def md5_hash_mode(files):
-    '''Displays md5 hashes of passed files'''
-
-    # Converting potential passed directories into their nested files
-    files = recursive_file_search(files)
-
-    # Initialising hashing task
-    currentHashingTask_initialise(files)
-
-    # Generating md5 hashes for all passed files
-    for fileToHash in files:
-        try:
-            print(fileToHash, md5_checksum(fileToHash))
-
-        except Exception as e:  # pylint: disable=W0703
-
-            # Informing user
-            sys.stderr.write('\nERROR: Failed to generate an md5 hash for the '
-                             'file \'%s\':\n\n%s\n\n%s\n' %
-                             (fileToHash, e, traceback.format_exc()))
-
-            # Registering error and moving to next file
-            currentHashingTask_error(e)
             continue
 
 
@@ -1078,8 +1084,8 @@ def check_sfv_file(checksumFile):
                 # Updating hashing task
                 currentHashingTask_update(fileHashed=True)
 
-                # Displaying results
-                display_results(fileToHash, crc, checksumFileCRC)
+                # Displaying results with appropriate mode
+                display_results(fileToHash, crc, 'colourHash', checksumFileCRC)
 
             # Capturing I/O errors to detect missing files
             except IOError as e:
@@ -1172,8 +1178,8 @@ def check_md5_file(checksumFile):
                 # Updating hashing task
                 currentHashingTask_update(fileHashed=True)
 
-                # Displaying results
-                display_results(fileToHash, md5, checksumFileMD5)
+                # Displaying results with appropriate mode
+                display_results(fileToHash, md5, 'colourHash', checksumFileMD5)
 
             # Capturing I/O errors to detect missing files
             except IOError as e:
@@ -1300,8 +1306,7 @@ def md5_create_mode(files):
                     currentHashingTask_update(fileHashed=True)
 
                     # Giving user feedback
-                    display_results(fileToHash, fileHash,
-                                    checksumFileGeneration=True)
+                    display_results(fileToHash, fileHash, 'hash')
 
                 except Exception as e:  # pylint: disable=W0703
 
@@ -1403,8 +1408,7 @@ def sfv_create_mode(files):
                     currentHashingTask_update(fileHashed=True)
 
                     # Giving user feedback
-                    display_results(fileToHash, fileHash,
-                                    checksumFileGeneration=True)
+                    display_results(fileToHash, fileHash, 'hash')
 
                 except Exception as e:  # pylint: disable=W0703
 
@@ -1550,7 +1554,7 @@ elif options.md5_create_mode:
     md5_create_mode(args)
 
 elif options.md5_hash_mode:
-    md5_hash_mode(args)
+    hash_files(args, 'md5')
 
 elif options.sfv_create_mode:
     sfv_create_mode(args)
@@ -1566,8 +1570,9 @@ elif not args:
 
 else:
 
-    # Normal CRC32 hashing needed
-    crc32_hash_mode(args)
+    # Normal CRC32 hashing needed, with addition of hashes to filenames as
+    # appropriate
+    hash_files(args, 'crc32', True)
 
 
 # Possible future improvement: How do I get a permanent line at the bottom
