@@ -903,6 +903,10 @@ def currentHashingTask_file_no_hash(noHashFile):
 def currentHashingTask_summary():
     '''Generates a summary of the completed current hashing task'''
 
+    # Exiting if the user has quashed summaries
+    if options.no_summary:
+        return
+
     # Obtaining stats to display
     notFoundCount = currentHashingTask['errorFileNotFoundCount']
     otherErrorCount = currentHashingTask['errorOtherCount']
@@ -1500,6 +1504,9 @@ metavar='md5_create_mode', action='store_true', default=False)
 parser.add_option('-M', '--md5-hash-mode', dest='md5_hash_mode',
 help='mode to hash given files and output md5 hashes',
 metavar='md5_hash_mode', action='store_true', default=False)
+parser.add_option('-n', '--no-summary', dest='no_summary',
+help='do not output the hashing task summary',
+metavar='no_summary', action='store_true', default=False)
 parser.add_option('-o', '--checksum-output', dest='checksumOutput',
 help='path to output checksum file to (only valid in checksum file creation '
 'modes). If omitted, the file is output to the hashed files\' common root '
