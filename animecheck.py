@@ -921,9 +921,18 @@ def currentHashingTask_summary():
                          'see errors noted before hashing started\n\n')
 
 
-def crc32_hash_mode(files):
-    '''CRC32 hashes passed files and displays results'''
+def hash_files(files, algorithm):
+    '''Hashes passed files with the algorithm requested, and displays and acts
+    on results as appropriate'''
 
+    # Validating algorithm
+    if algorithm != 'crc32' and algorithm != 'md5':
+        
+        # Invalid algorithm specified - erroring
+        sys.stderr.write('ERROR: Failed to hash the file \'%s\':\n\n%s\n\n%s\n'
+                         % (fileToHash, e, traceback.format_exc()))
+
+    
     # Converting potential passed directories into their nested files
     files = recursive_file_search(files)
 
@@ -947,8 +956,9 @@ def crc32_hash_mode(files):
         except Exception as e:  # pylint: disable=W0703
 
             # Informing user
-            sys.stderr.write('\nFailed to hash the file \'%s\':\n\n%s\n\n%s\n'
-                             % (fileToHash, e, traceback.format_exc()))
+            sys.stderr.write('\nERROR: Failed to hash the file \'%s\':\n\n%s\n'
+                             '\n%s\n' % (fileToHash, e,
+                                         traceback.format_exc()))
 
             # Registering error and moving to next file
             currentHashingTask_error(e)
@@ -986,8 +996,8 @@ def crc32_hash_mode(files):
             shutil.move(hashedFile[0], filePath)
 
         except Exception as e:  # pylint: disable=W0703
-            sys.stderr.write('Addition of CRC32 hash \'%s\' to the filename of'
-                             ' \'%s\' failed:\n\n%s\n\n%s\n'
+            sys.stderr.write('ERROR: Addition of CRC32 hash \'%s\' to the '
+                             'filename of \'%s\' failed:\n\n%s\n\n%s\n'
                              % (crc, hashedFile[0], e,
                                 traceback.format_exc()))
             continue
@@ -1010,8 +1020,8 @@ def md5_hash_mode(files):
         except Exception as e:  # pylint: disable=W0703
 
             # Informing user
-            sys.stderr.write('\nFailed to generate an md5 hash for the file '
-                             '\'%s\':\n\n%s\n\n%s\n' %
+            sys.stderr.write('\nERROR: Failed to generate an md5 hash for the '
+                             'file \'%s\':\n\n%s\n\n%s\n' %
                              (fileToHash, e, traceback.format_exc()))
 
             # Registering error and moving to next file
@@ -1078,14 +1088,15 @@ def check_sfv_file(checksumFile):
                 if e.errno == 2:
 
                     # It is - reporting the missing file concisely
-                    sys.stderr.write('Failed to hash \'%s\' - file does not '
-                                     'exist!\n' % fileToHash)
+                    sys.stderr.write('ERROR: Failed to hash \'%s\' - file does'
+                                     ' not exist!\n' % fileToHash)
 
                 else:
 
                     # It doesn't - treating as a normal unknown error
-                    sys.stderr.write('Failed to hash \'%s\':\n\n%s\n\n%s\n' %
-                                     (fileToHash, e, traceback.format_exc()))
+                    sys.stderr.write('ERROR: Failed to hash \'%s\':\n\n%s\n\n'
+                                     '%s\n' % (fileToHash, e,
+                                               traceback.format_exc()))
 
                 # Registering error and moving to next file
                 currentHashingTask_error(e)
@@ -1095,8 +1106,8 @@ def check_sfv_file(checksumFile):
             except Exception as e:  # pylint: disable=W0703
 
                 # Informing user
-                sys.stderr.write('Failed to hash \'%s\':\n\n%s\n\n%s\n' %
-                                 (fileToHash, e, traceback.format_exc()))
+                sys.stderr.write('ERROR: Failed to hash \'%s\':\n\n%s\n\n%s\n'
+                                 % (fileToHash, e, traceback.format_exc()))
 
                 # Registering error and moving to next file
                 currentHashingTask_error(e)
@@ -1106,8 +1117,9 @@ def check_sfv_file(checksumFile):
         currentHashingTask_summary()
 
     except Exception as e:  # pylint: disable=W0703
-        sys.stderr.write('Failed to process the checksum file \'%s\':\n\n%s\n'
-                         '\n%s\n' % (checksumFile, e, traceback.format_exc()))
+        sys.stderr.write('ERROR: Failed to process the checksum file \'%s\':\n'
+                         '\n%s\n\n%s\n' % (checksumFile, e,
+                                           traceback.format_exc()))
 
 
 def check_md5_file(checksumFile):
@@ -1170,14 +1182,15 @@ def check_md5_file(checksumFile):
                 if e.errno == 2:
 
                     # It is - reporting the missing file concisely
-                    sys.stderr.write('Failed to hash \'%s\' - file does not '
-                                     'exist!\n' % fileToHash)
+                    sys.stderr.write('ERROR: Failed to hash \'%s\' - file does'
+                                     ' not exist!\n' % fileToHash)
 
                 else:
 
                     # It doesn't - treating as a normal unknown error
-                    sys.stderr.write('Failed to hash \'%s\':\n\n%s\n\n%s\n' %
-                                     (fileToHash, e, traceback.format_exc()))
+                    sys.stderr.write('ERROR: Failed to hash \'%s\':\n\n%s\n\n'
+                                     '%s\n' % (fileToHash, e,
+                                               traceback.format_exc()))
 
                 # Registering error and moving to next file
                 currentHashingTask_error(e)
@@ -1187,8 +1200,8 @@ def check_md5_file(checksumFile):
             except Exception as e:  # pylint: disable=W0703
 
                 # Informing user
-                sys.stderr.write('Failed to hash \'%s\':\n\n%s\n\n%s\n' %
-                                 (fileToHash, e, traceback.format_exc()))
+                sys.stderr.write('ERROR: Failed to hash \'%s\':\n\n%s\n\n%s\n'
+                                 % (fileToHash, e, traceback.format_exc()))
 
                 # Registering error and moving to next file
                 currentHashingTask_error(e)
@@ -1198,8 +1211,9 @@ def check_md5_file(checksumFile):
         currentHashingTask_summary()
 
     except Exception as e:  # pylint: disable=W0703
-        sys.stderr.write('Failed to process the checksum file \'%s\':\n\n%s\n'
-                         '\n%s\n' % (checksumFile, e, traceback.format_exc()))
+        sys.stderr.write('ERROR: Failed to process the checksum file \'%s\':\n'
+                         '\n%s\n\n%s\n' % (checksumFile, e,
+                                           traceback.format_exc()))
 
 
 def checksum_read_mode(files):
@@ -1292,7 +1306,7 @@ def md5_create_mode(files):
                 except Exception as e:  # pylint: disable=W0703
 
                     # Informing user
-                    sys.stderr.write('Failed to hash \'%s\':\n\n%s\n' %
+                    sys.stderr.write('ERROR: Failed to hash \'%s\':\n\n%s\n' %
                                      (fileToHash, e))
 
                     # Recording error in checksum file so that the user is in
@@ -1325,8 +1339,8 @@ def md5_create_mode(files):
         currentHashingTask_summary()
 
     except Exception as e:  # pylint: disable=W0703
-        sys.stderr.write('Failed to write to the checksum file \'%s\':\n\n%s'
-                         '\n\n%s\n' % (checksumFileOutput, e,
+        sys.stderr.write('ERROR: Failed to write to the checksum file \'%s\':'
+                         '\n\n%s\n\n%s\n' % (checksumFileOutput, e,
                                        traceback.format_exc()))
         sys.exit(1)
 
@@ -1395,7 +1409,7 @@ def sfv_create_mode(files):
                 except Exception as e:  # pylint: disable=W0703
 
                     # Informing user
-                    sys.stderr.write('Failed to hash \'%s\':\n\n%s\n' %
+                    sys.stderr.write('ERROR: Failed to hash \'%s\':\n\n%s\n' %
                                      (fileToHash, e))
 
                     # Recording error in checksum file so that the user is in
@@ -1418,15 +1432,15 @@ def sfv_create_mode(files):
             print('\nChecksum file \'' + checksumFileOutput + '\' has been '
                   'written successfully')
         else:
-            print('\nWarning! Checksum file \'' + checksumFileOutput + '\' has'
+            print('\nWARNING: Checksum file \'' + checksumFileOutput + '\' has'
                   ' not been written successfully! See above for errors')
 
         # Displaying a summary of the hashing task's progress
         currentHashingTask_summary()
 
     except Exception as e:  # pylint: disable=W0703
-        sys.stderr.write('Failed to write to the checksum file \'%s\':\n\n%s\n'
-                         '\n%s\n'
+        sys.stderr.write('ERROR: Failed to write to the checksum file \'%s\':'
+                         '\n\n%s\n\n%s\n'
                          % (checksumFileOutput, e, traceback.format_exc()))
         sys.exit(1)
 
@@ -1448,8 +1462,8 @@ def ed2k_link_mode(files):
         except Exception as e:  # pylint: disable=W0703
 
             # Informing user
-            sys.stderr.write('\nFailed to generate an eD2k link for the file '
-                             '\'%s\':\n\n%s\n\n%s\n'
+            sys.stderr.write('\nERROR: Failed to generate an eD2k link for the'
+                             ' file \'%s\':\n\n%s\n\n%s\n'
                              % (fileToHash, e, traceback.format_exc()))
 
             # Registering error and moving to next file
