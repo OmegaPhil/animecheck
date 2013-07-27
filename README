@@ -25,6 +25,7 @@ Optional
 --------
 
 Colorama module for color support on Windows, courtesy of wiiaboo - http://pypi.python.org/pypi/colorama
+OpenSSL install (on Debian, specifically the libssl package) for the md4 hash used in the eD2k hashing mode.
 
 
 Documentation
