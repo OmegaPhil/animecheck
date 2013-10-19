@@ -510,7 +510,7 @@ def recursive_file_search(pathsToSearch):
         else:
 
             # Alerting user to invalid path and exiting
-            sys.stderr.write('Path \'%s\' is invalid' % path)
+            sys.stderr.write('Path \'%s\' is invalid\n' % path)
             sys.exit(1)
 
     # Looping through all found files
