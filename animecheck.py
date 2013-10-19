@@ -497,8 +497,14 @@ def recursive_file_search(pathsToSearch):
             # Recursively walking through directories discovered. If you don't
             # pass an error handler, errors associated with listing the passed
             # directory are silently ignored!!
-            for directory_path, _, directory_files in os.walk(path,
-                                                onerror=walk_error_handler):
+            for directory_path, directory_names, directory_files in (
+                os.walk(path, onerror=walk_error_handler)):
+
+                # Removing all subdirectories from the search if the user has
+                # chosen to never recurse into them (directory_names isn't the
+                # target, but the list owned by os.walk that it points to)
+                if options.no_recurse:
+                    directory_names[:] = []
 
                 # Adding all discovered files to the main list
                 for directory_file in directory_files:
@@ -1513,6 +1519,9 @@ metavar='md5_hash_mode', action='store_true', default=False)
 parser.add_option('-n', '--no-summary', dest='no_summary',
 help='do not output the hashing task summary',
 metavar='no_summary', action='store_true', default=False)
+parser.add_option('', '--no-recurse', dest='no_recurse',
+help='do not recurse into subdirectories',
+metavar='no_recurse', action='store_true', default=False)
 parser.add_option('-o', '--checksum-output', dest='checksumOutput',
 help='path to output checksum file to (only valid in checksum file creation '
 'modes). If omitted, the file is output to the hashed files\' common root '
