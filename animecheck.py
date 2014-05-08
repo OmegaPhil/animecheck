@@ -1521,7 +1521,7 @@ metavar='md5_hash_mode', action='store_true', default=False)
 parser.add_option('-n', '--no-summary', dest='no_summary',
 help='do not output the hashing task summary',
 metavar='no_summary', action='store_true', default=False)
-parser.add_option('', '--no-recurse', dest='no_recurse',
+parser.add_option('-N', '--no-recurse', dest='no_recurse',
 help='do not recurse into subdirectories',
 metavar='no_recurse', action='store_true', default=False)
 parser.add_option('-o', '--checksum-output', dest='checksumOutput',
