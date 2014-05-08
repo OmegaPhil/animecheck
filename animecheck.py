@@ -3,12 +3,12 @@
 '''
 Version 1 2013.06.13
 Copyright (c) 2009, Taoufik El Aoumari (v0.2)
-Copyright (c) 2012-2013, OmegaPhil (v0.3-) - OmegaPhil+animecheck@gmail.com
+Copyright (c) 2012-2014, OmegaPhil (v0.3-) - OmegaPhil+animecheck@gmail.com
 Copyright (c) 2012-2013, Ricardo Constantino (v0.5, 0.11) - wiiaboo@gmail.com
 
 This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License.
+it under the terms of the GNU General Public License version 3 as
+published by the Free Software Foundation.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,13 +25,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import division, print_function, unicode_literals
 
 GPL_NOTICE = '''
-Copyright (C) 2012 OmegaPhil
+Copyright (C) 2012-2014 OmegaPhil
 License GPLv3: GNU GPL version 3 <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 '''
 
-import hashlib
 import io
 import os
 import re
@@ -40,6 +39,9 @@ import sys
 import time
 import traceback
 import zlib
+
+import hashlib
+
 from datetime import datetime, timedelta
 from optparse import OptionParser
 
