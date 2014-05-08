@@ -478,40 +478,45 @@ def recursive_file_search(pathsToSearch):
     # Initialising variables
     foundFiles = []
     sanitisedFiles = []
+    directoryRecurseWarning = False
 
     # Looping through all passed files and directories
     for path in pathsToSearch:
         if os.path.isdir(path):
 
-            # Preparing the path to submit to os.walk - in Python 2, if a
-            # unicode string is passed and a subsequent file/directory has
-            # invalid bytes (invalid codepoint sequence) in its' name, any
-            # attempt by Python to manipulate the string will cause an
-            # unhandled UnicodeDecodeError. Bytes or strings don't have this
-            # issue as they are raw data and therefore not interpreted. In
-            # Python 3, strings are unicode by default, and the default
-            # behaviour for invalid bytes is to represent them by surrogate
-            # pairs rather than throwing an error
-            # Note that 'bytes()' in Python 2 is an alias to 'str()'
-            if sys.version_info.major < 3:
-                path = str(path)
+            # Warning user that directories are ignored in --no-recurse mode
+            # and skipping
+            if options.no_recurse:
+                if not directoryRecurseWarning:
+                    sys.stderr.write('WARNING: Directory/ies have been '
+                                     'detected to hash but will be skipped due'
+                                     ' to --no-recurse\n\n')
+                    directoryRecurseWarning = True
+            else:
 
-            # Recursively walking through directories discovered. If you don't
-            # pass an error handler, errors associated with listing the passed
-            # directory are silently ignored!!
-            for directory_path, directory_names, directory_files in (
-                os.walk(path, onerror=walk_error_handler)):
+                # Preparing the path to submit to os.walk - in Python 2, if a
+                # unicode string is passed and a subsequent file/directory has
+                # invalid bytes (invalid codepoint sequence) in its' name, any
+                # attempt by Python to manipulate the string will cause an
+                # unhandled UnicodeDecodeError. Bytes or strings don't have
+                # this issue as they are raw data and therefore not
+                # interpreted. In Python 3, strings are unicode by default, and
+                # the default behaviour for invalid bytes is to represent them
+                # by surrogate pairs rather than throwing an error
+                # Note that 'bytes()' in Python 2 is an alias to 'str()'
+                if sys.version_info.major < 3:
+                    path = str(path)
 
-                # Removing all subdirectories from the search if the user has
-                # chosen to never recurse into them (directory_names isn't the
-                # target, but the list owned by os.walk that it points to)
-                if options.no_recurse:
-                    directory_names[:] = []
+                # Recursively walking through directories discovered. If you
+                # don't pass an error handler, errors associated with listing
+                # the passed directory are silently ignored!!
+                for directory_path, _, directory_files in (
+                    os.walk(path, onerror=walk_error_handler)):
 
-                # Adding all discovered files to the main list
-                for directory_file in directory_files:
-                    foundFiles.append(os.path.join(directory_path,
-                                                   directory_file))
+                    # Adding all discovered files to the main list
+                    for directory_file in directory_files:
+                        foundFiles.append(os.path.join(directory_path,
+                                                       directory_file))
         elif os.path.isfile(path):
             foundFiles.append(path)
 
