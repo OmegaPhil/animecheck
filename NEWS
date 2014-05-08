@@ -1,3 +1,6 @@
+v1.1 (08.05.14):
+-N/--no-recurse added - ignores all directories passed and emits a warning if one or more are detected (https://github.com/OmegaPhil/animecheck/issues/27) - note that if you were using the initial implementation of this mode prior to this v1.1 announcement, the behaviour has changed - rather than recursing one level into directories passed, now no directories are recursed at all (this is in-keeping with canonical UNIX tools)
+
 v1 (13.06.13):
 This script has now been around long enough and has done its core job adequately enough to reach version 1 finally! Only a minor functionality update from the user perspective:
 
