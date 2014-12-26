@@ -849,6 +849,8 @@ def currentHashingTask_update(hashedData=0, fileSize=0, hashedSoFar=0,
             else:
                 averageSpeed = '0B/Sec'
 
+            if options.no_progress:
+                return
             # Updating terminal - print digit in 7 character field with right
             # justification
             if fileSize > 0:
@@ -1529,6 +1531,13 @@ metavar='no_summary', action='store_true', default=False)
 parser.add_option('-N', '--no-recurse', dest='no_recurse',
 help='do not recurse into subdirectories',
 metavar='no_recurse', action='store_true', default=False)
+parser.add_option('', '--no-progress', dest='no_progress',
+help='don\'t print any progress information',
+metavar='no_progress', action='store_true', default=False)
+parser.add_option('', '--no-special-chars', dest='no_special_chars',
+help='this will deactivate colors and non-printable characters (useful for '
+'piping the output)',
+metavar='no_special_chars', action='store_true', default=False)
 parser.add_option('-o', '--checksum-output', dest='checksumOutput',
 help='path to output checksum file to (only valid in checksum file creation '
 'modes). If omitted, the file is output to the hashed files\' common root '
@@ -1557,6 +1566,12 @@ if (options.checksum_read_mode + options.sfv_create_mode +
     sys.stderr.write(parser.get_usage() + '\nOnly one mode can be enabled at '
                      'once\n')
     sys.exit(1)
+
+if options.no_special_chars:
+    H_NULL = ''
+    H_RED = ''
+    H_GREEN = ''
+    P_RESET = '\x0D'
 
 # cfv cannot cope even with opening rapidcrc mod files, let alone intelligently
 # dealing with Windows-based nested directory structures inside - dropping
