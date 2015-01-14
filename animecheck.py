@@ -57,7 +57,7 @@ listingError = False
 
 # Fix Python 2.x input
 try:
-    input = raw_input  # pylint: disable=W0622
+    input = raw_input  # pylint: disable=redefined-builtin,undefined-variable
 except NameError:
     pass
 
@@ -73,7 +73,7 @@ if sys.getdefaultencoding() != 'utf-8':
     # Non-UTF-8 encoding in use (probably ASCII) - fixing (the
     # setdefaultencoding method is removed after it is set in a site
     # customisation script during Python startup I think - hence the reload)
-    reload(sys)
+    reload(sys)  # pylint: disable=undefined-variable
     sys.setdefaultencoding('utf-8')  # pylint: disable=E1101
 
 
@@ -100,8 +100,8 @@ def crc32_checksum(filename):
                 # Updating the hashing task status
                 if data:
                     currentHashingTask_update(hashedData=len(data),
-                                                   fileSize=size,
-                                                   hashedSoFar=done)
+                                              fileSize=size,
+                                              hashedSoFar=done)
 
                 # Iteratively hashing the data
                 if not data:
@@ -153,8 +153,8 @@ def md5_checksum(filename):
                 # Updating the hashing task status
                 if data:
                     currentHashingTask_update(hashedData=len(data),
-                                                   fileSize=size,
-                                                   hashedSoFar=done)
+                                              fileSize=size,
+                                              hashedSoFar=done)
 
                 # Iteratively hashing the data
                 if not data:
@@ -239,8 +239,8 @@ def ed2k_link(filename):
                     # Updating the hashing task status
                     if data:
                         currentHashingTask_update(hashedData=len(data),
-                                                       fileSize=fileSize,
-                                                       hashedSoFar=done)
+                                                  fileSize=fileSize,
+                                                  hashedSoFar=done)
 
                 # Yielding or exiting based on whether the current block of
                 # data is empty. As this is a generator function and
@@ -314,7 +314,7 @@ def display_results(fileToHash, obtainedHash, displayMode,
         sys.exit()
 
     if (displayMode == 'colourHashWithHashInFilename'
-        and hashRegex == None):
+        and hashRegex is None):
 
         # Coloured filename hash was specified, but the regex necessary for
         # detecting the hash was not specified - erroring
@@ -526,7 +526,7 @@ def recursive_file_search(pathsToSearch):
                 # unicode (and subsequently catching invalid encoding). Note
                 # that replacing/escaping invalid characters at this stage
                 # merely causes a later stage to cock up
-                sanitisedFiles.append(unicode(foundFile))
+                sanitisedFiles.append(unicode(foundFile))  # pylint: disable=undefined-variable
             else:
 
                 # For Python 3, the string is already a unicode one, with
@@ -546,7 +546,7 @@ def recursive_file_search(pathsToSearch):
             # to mark the invalid bytes and is therefore safe to print and
             # write
             if sys.version_info.major < 3:
-                badPath = unicode(foundFile, errors='replace')
+                badPath = unicode(foundFile, errors='replace')  # pylint: disable=undefined-variable
             else:
                 badPath = foundFile
             sys.stderr.write('\nERROR: The file \'%s\' has invalid encoding in'
@@ -750,7 +750,7 @@ def currentHashingTask_update(hashedData=0, fileSize=0, hashedSoFar=0,
     '''Updates current hashing task record'''
 
     # Persisting currentHashingTask changes
-    global currentHashingTask
+    global currentHashingTask  # pylint: disable=global-variable-not-assigned
 
     # Updating task - splitting based on whether the update is more data
     # hashed or a file has been completed
@@ -791,7 +791,7 @@ def currentHashingTask_update(hashedData=0, fileSize=0, hashedSoFar=0,
 
             # Updating recorded speeds
             if (currentHashingTask['lastUpdatedSpeed'] == 0 or
-            currentHashingTask['lastUpdatedSpeed'] == 4):
+                currentHashingTask['lastUpdatedSpeed'] == 4):
 
                 # No speed yet recorded or the records have looped
                 currentHashingTask['speed1'] = hashedData / duration
@@ -842,7 +842,7 @@ def currentHashingTask_update(hashedData=0, fileSize=0, hashedSoFar=0,
                                                      P_RESET))
                 sys.stdout.flush()
 
-    elif fileHashed != False:
+    elif fileHashed:
 
         # Updating file counts
         currentHashingTask['filesToHash'] -= 1
@@ -862,7 +862,7 @@ def currentHashingTask_error(e):
     '''Registers an error with the current hashing task record'''
 
     # Persisting currentHashingTask changes
-    global currentHashingTask
+    global currentHashingTask  # pylint: disable=global-variable-not-assigned
 
     # Dealing with various errors
     if isinstance(e, IOError) and e.errno == 2:
@@ -880,7 +880,7 @@ def currentHashingTask_file_corrupt(corruptFile):
     '''Registers a corrupt file with the current hashing task record'''
 
     # Persisting currentHashingTask changes
-    global currentHashingTask
+    global currentHashingTask  # pylint: disable=global-variable-not-assigned
 
     # Updating corrupt file count
     currentHashingTask['corruptFileCount'] += 1
@@ -891,7 +891,7 @@ def currentHashingTask_file_no_hash(noHashFile):
     record'''
 
     # Persisting currentHashingTask changes
-    global currentHashingTask
+    global currentHashingTask  # pylint: disable=global-variable-not-assigned
 
     # Updating no hash file count
     currentHashingTask['noHashFileCount'] += 1
@@ -987,7 +987,7 @@ def hash_files(files, algorithm, hashInFilename=False):
             # Informing user
             sys.stderr.write('\nERROR: Failed to %s hash the file \'%s\':\n\n'
                              '%s\n\n%s\n' % (algorithm, fileToHash, e,
-                                         traceback.format_exc()))
+                                             traceback.format_exc()))
 
             # Registering error and moving to next file
             currentHashingTask_error(e)
@@ -1006,7 +1006,7 @@ def hash_files(files, algorithm, hashInFilename=False):
     # is 'ask', proceeding only if the user wants to
     if (options.addHashMode == 'ask'
         and input('Do you want to add %s hashes to the filenames of files'
-        ' without them (Y/n)? ' % algorithm).lower() == 'n'):
+                  ' without them (Y/n)? ' % algorithm).lower() == 'n'):
         print('Hashes will not be added to files without them')
         sys.exit()
 
@@ -1058,7 +1058,7 @@ def check_sfv_file(checksumFile):
                 # there are contiguous spaces. As a capturing group is at the
                 # start, '' is returned in 0
                 match = re.split(r'^(.*)\s+([a-f0-9]{8})$', line,
-                                flags=re.IGNORECASE)
+                                 flags=re.IGNORECASE)
                 path, checksumFileCRC = match[1], match[2]
 
                 # Coping with nested directories in the path depending on
@@ -1070,7 +1070,7 @@ def check_sfv_file(checksumFile):
 
                 # Constructing full path to hash and adding it to the list
                 files.append([os.path.join(os.path.dirname(checksumFile),
-                                          path), checksumFileCRC])
+                                           path), checksumFileCRC])
 
         # Lines processed - initialising hashing task
         currentHashingTask_initialise([fileToHash[0] for fileToHash in files])
@@ -1152,7 +1152,7 @@ def check_md5_file(checksumFile):
                 # contiguous spaces. As a capturing group is at the start, ''
                 # is returned in 0
                 match = re.split(r'^([a-f0-9]{32})\s+\*?(.+)$', line,
-                                flags=re.IGNORECASE)
+                                 flags=re.IGNORECASE)
                 path, checksumFileMD5 = match[2], match[1]
 
                 # Coping with nested directories in the path depending on
@@ -1164,7 +1164,7 @@ def check_md5_file(checksumFile):
 
                 # Constructing full path to hash and adding it to the list
                 files.append([os.path.join(os.path.dirname(checksumFile),
-                                          path), checksumFileMD5])
+                                           path), checksumFileMD5])
 
         # Lines processed - initialising hashing task
         currentHashingTask_initialise([fileToHash[0] for fileToHash in files])
@@ -1275,7 +1275,7 @@ def md5_create_mode(files):
             checksumFileOutput = options.checksumOutput
         else:
             checksumFileOutput = (commonPrefix + os.sep +
-            os.path.basename(commonPrefix) + '.md5')
+                                  os.path.basename(commonPrefix) + '.md5')
 
         # User feedback
         print('\nGenerating \'%s\'...\n' % checksumFileOutput)
@@ -1283,8 +1283,8 @@ def md5_create_mode(files):
         # Writing out header to checksum file
         with io.open(checksumFileOutput, 'w') as checksumFile:
             checksumFile.writelines('; Generated by %s v%s on %s' %
-                (os.path.split(sys.argv[0])[1], VERSION,
-                datetime.now().isoformat() + '\n;\n'))
+                                    (os.path.split(sys.argv[0])[1], VERSION,
+                                     datetime.now().isoformat() + '\n;\n'))
 
             # Initialising hashing task
             currentHashingTask_initialise(files)
@@ -1333,7 +1333,7 @@ def md5_create_mode(files):
                 checksumFile.write(fileHash + ' *' + relativePath + '\n')
 
         # Reporting to the user on the success of writing the checksum file
-        if errorOccurred == False:
+        if not errorOccurred:
             print('\nChecksum file \'' + checksumFileOutput + '\' has been '
                   'written successfully')
         else:
@@ -1347,7 +1347,7 @@ def md5_create_mode(files):
     except Exception as e:  # pylint: disable=W0703
         sys.stderr.write('ERROR: Failed to write to the checksum file \'%s\':'
                          '\n\n%s\n\n%s\n' % (checksumFileOutput, e,
-                                       traceback.format_exc()))
+                                             traceback.format_exc()))
         sys.exit(1)
 
 
@@ -1377,7 +1377,7 @@ def sfv_create_mode(files):
             checksumFileOutput = options.checksumOutput
         else:
             checksumFileOutput = (commonPrefix + os.sep +
-            os.path.basename(commonPrefix) + '.sfv')
+                                  os.path.basename(commonPrefix) + '.sfv')
 
         # User feedback
         print('\nGenerating \'%s\'...\n' % checksumFileOutput)
@@ -1385,8 +1385,8 @@ def sfv_create_mode(files):
         # Writing out header to checksum file
         with io.open(checksumFileOutput, 'w') as checksumFile:
             checksumFile.writelines('; Generated by %s v%s on %s' %
-                (os.path.split(sys.argv[0])[1], VERSION,
-                datetime.now().isoformat() + '\n;\n'))
+                                    (os.path.split(sys.argv[0])[1], VERSION,
+                                     datetime.now().isoformat() + '\n;\n'))
 
             # Initialising hashing task
             currentHashingTask_initialise(files)
@@ -1433,7 +1433,7 @@ def sfv_create_mode(files):
                 checksumFile.write(relativePath + ' ' + fileHash + '\n')
 
         # Reporting to the user on the success of writing the checksum file
-        if errorOccurred == False:
+        if not errorOccurred:
             print('\nChecksum file \'' + checksumFileOutput + '\' has been '
                   'written successfully')
         else:
