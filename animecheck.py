@@ -829,16 +829,17 @@ def currentHashingTask_update(hashedData=0, fileSize=0, hashedSoFar=0,
             else:
                 averageSpeed = '0B/Sec'
 
-            if options.no_progress:
-                return
             # Updating terminal - print digit in 7 character field with right
-            # justification
-            if fileSize > 0:
-                sys.stdout.write('%7d%% %s%s' % (hashedSoFar * 100 / fileSize,
-                                                 averageSpeed, P_RESET))
-            else:
-                sys.stdout.write('%7d%% %s%s' % (100, averageSpeed, P_RESET))
-            sys.stdout.flush()
+            # justification, but only if progress output is desired
+            if not options.no_progress:
+                if fileSize > 0:
+                    sys.stdout.write('%7d%% %s%s' % (hashedSoFar * 100 /
+                                                     fileSize, averageSpeed,
+                                                     P_RESET))
+                else:
+                    sys.stdout.write('%7d%% %s%s' % (100, averageSpeed,
+                                                     P_RESET))
+                sys.stdout.flush()
 
     elif fileHashed != False:
 
