@@ -45,6 +45,7 @@ import hashlib
 from datetime import datetime, timedelta
 from optparse import OptionParser
 
+
 # Initialising variables
 addHashModeFiles = []
 VERSION = '1.1'  # Remember to update the notice at the top too
@@ -52,27 +53,6 @@ addHashFormat = '{name} [{hash}]'
 done = 0
 currentHashingTask = {}
 listingError = False
-
-# Defining terminal escape codes based on OS
-H_NULL = '\x1b[00;00m'
-H_RED = '\x1b[31;01m'
-H_GREEN = '\x1b[32;01m'
-#P_RESET = '\x08'  # Backspace...
-
-# Clear to end of line then carriage return. This is usable now that there
-# are only two terminal updates a second
-P_RESET = '\x1B[K\x0D'
-
-if os.name == 'nt':
-    try:
-        from colorama import init # pylint: disable=F0401
-
-        init()
-
-    except ImportError:
-        H_NULL = H_RED = H_GREEN = ''
-
-    P_RESET = '\x0D'
 
 # Fix Python 2.x input
 try:
@@ -1567,10 +1547,33 @@ if (options.checksum_read_mode + options.sfv_create_mode +
                      'once\n')
     sys.exit(1)
 
-if options.no_special_chars:
-    H_NULL = ''
-    H_RED = ''
-    H_GREEN = ''
+# Checking if special characters are desired (output not used in a script etc)
+if not options.no_special_chars:
+
+    # Defining terminal escape codes based on OS
+    H_NULL = '\x1b[00;00m'
+    H_RED = '\x1b[31;01m'
+    H_GREEN = '\x1b[32;01m'
+    #P_RESET = '\x08'  # Backspace...
+
+    # Clear to end of line then carriage return. This is usable now that there
+    # are only two terminal updates a second
+    P_RESET = '\x1B[K\x0D'
+
+    if os.name == 'nt':
+        try:
+            from colorama import init # pylint: disable=F0401
+
+            init()
+
+        except ImportError:
+            H_NULL = H_RED = H_GREEN = ''
+
+        P_RESET = '\x0D'
+else:
+
+    # No special characters allowed
+    H_NULL = H_RED = H_GREEN = ''
     P_RESET = '\x0D'
 
 # cfv cannot cope even with opening rapidcrc mod files, let alone intelligently
