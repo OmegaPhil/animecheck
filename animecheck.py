@@ -3,8 +3,9 @@
 '''
 Version 1.1 2014.05.08
 Copyright (c) 2009, Taoufik El Aoumari (v0.2)
-Copyright (c) 2012-2014, OmegaPhil (v0.3-) - OmegaPhil+animecheck@gmail.com
+Copyright (c) 2012-2015, OmegaPhil (v0.3-) - OmegaPhil@startmail.com
 Copyright (c) 2012-2013, Ricardo Constantino (v0.5, 0.11) - wiiaboo@gmail.com
+Copyright (c) 2015, darealshinji (v1.2)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License version 3 as
@@ -25,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import division, print_function, unicode_literals
 
 GPL_NOTICE = '''
-Copyright (C) 2012-2014 OmegaPhil
+Copyright (C) 2012-2015 OmegaPhil
 License GPLv3: GNU GPL version 3 <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
