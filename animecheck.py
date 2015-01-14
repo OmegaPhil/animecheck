@@ -1514,11 +1514,11 @@ parser.add_option('-N', '--no-recurse', dest='no_recurse',
 help='do not recurse into subdirectories',
 metavar='no_recurse', action='store_true', default=False)
 parser.add_option('', '--no-progress', dest='no_progress',
-help='don\'t print any progress information',
+help='do not output any hashing progress information',
 metavar='no_progress', action='store_true', default=False)
 parser.add_option('', '--no-special-chars', dest='no_special_chars',
-help='this will deactivate colors and non-printable characters (useful for '
-'piping the output)',
+help='deactivate colours and non-printable characters from the output (useful for'
+' piping)',
 metavar='no_special_chars', action='store_true', default=False)
 parser.add_option('-o', '--checksum-output', dest='checksumOutput',
 help='path to output checksum file to (only valid in checksum file creation '
