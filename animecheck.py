@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 '''
-Version 1.1 2014.05.08
+Version 1.2 2015.01.16
 Copyright (c) 2009, Taoufik El Aoumari (v0.2)
 Copyright (c) 2012-2015, OmegaPhil (v0.3-) - OmegaPhil@startmail.com
 Copyright (c) 2012-2013, Ricardo Constantino (v0.5, 0.11) - wiiaboo@gmail.com
-Copyright (c) 2015, darealshinji (v1.2)
+Copyright (c) 2015, djcj (darealshinji) (v1.2) - djcj@gmx.de
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License version 3 as
@@ -49,7 +49,7 @@ from optparse import OptionParser
 
 # Initialising variables
 addHashModeFiles = []
-VERSION = '1.1'  # Remember to update the notice at the top too
+VERSION = '1.2'  # Remember to update the notice at the top too
 addHashFormat = '{name} [{hash}]'
 done = 0
 currentHashingTask = {}

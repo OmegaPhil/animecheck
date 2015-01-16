@@ -24,7 +24,7 @@ Python v2.7 (compatible with Python v3.2)
 Optional
 --------
 
-Colorama module for color support on Windows, courtesy of wiiaboo - http://pypi.python.org/pypi/colorama
+Colorama module for colour support on Windows, courtesy of wiiaboo - http://pypi.python.org/pypi/colorama
 OpenSSL install (on Debian, specifically the libssl package) for the md4 hash used in the eD2k hashing mode.
 
 
@@ -37,10 +37,11 @@ See animecheck.py --help. If this is not enough and enough people are interested
 Contact Details
 ===============
 
-OmegaPhil: OmegaPhil+animecheck@gmail.com
+OmegaPhil: OmegaPhil@startmail.com
 
 
 Credits
 =======
 
 wiiaboo (Ricardo Constantino): Code fixes to support Windows command prompt, fixes to support Python v3 whilst keeping v2.x compatibility (v0.5, 0.11).
+darealshinji: Implemented --no-progress and --no-special-chars (v1.2).

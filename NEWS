@@ -1,3 +1,8 @@
+v1.2 (14.01.15):
+--no-progress added - don't output hashing progress
+--no-special-chars added - don't output colours or special characters
+Both courtesy of darealshinji, so that this script can also be competently used by other scripts (https://github.com/OmegaPhil/animecheck/pull/29)
+
 v1.1 (08.05.14):
 -N/--no-recurse added - ignores all directories passed and emits a warning if one or more are detected (https://github.com/OmegaPhil/animecheck/issues/27) - note that if you were using the initial implementation of this mode prior to this v1.1 announcement, the behaviour has changed - rather than recursing one level into directories passed, now no directories are recursed at all (this is in-keeping with canonical UNIX tools)
 
